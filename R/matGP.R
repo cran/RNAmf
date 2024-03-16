@@ -122,11 +122,6 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
       return(c(lower, upper))
     }
 
-    # # darg way
-    # init <- rep(sort(distance(X))[sort(distance(X))!=0][0.1*length(sort(distance(X))[sort(distance(X))!=0])], ncol(X))
-    # lower <- min(sort(distance(X))[sort(distance(X))!=0])
-    # upper <- max(sort(distance(X))[sort(distance(X))!=0])
-
     # hetGP way * 10^(d*2/3)
     XX <- (X - matrix(apply(X, 2, range)[1, ], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1 / (apply(X, 2, range)[2, ] - apply(X, 2, range)[1, ]), ncol(X))
     lower <- max(10^(ncol(XX) * 2 / 3) * apply(XX, 2, parbound)[1, ], 0.2)
@@ -210,11 +205,6 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
 
       return(c(lower, upper))
     }
-
-    # # darg way
-    # init <- rep(sort(distance(X))[sort(distance(X))!=0][0.1*length(sort(distance(X))[sort(distance(X))!=0])], ncol(X))
-    # lower <- min(sort(distance(X))[sort(distance(X))!=0])
-    # upper <- max(sort(distance(X))[sort(distance(X))!=0])
 
     # hetGP way * 10^(d*2/3)
     XX <- (X - matrix(apply(X, 2, range)[1, ], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1 / (apply(X, 2, range)[2, ] - apply(X, 2, range)[1, ]), ncol(X))

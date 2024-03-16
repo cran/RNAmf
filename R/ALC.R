@@ -36,19 +36,19 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
 
-  Xcand <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
 
   ### Choose level 1 ###
   ### update Ki1
   if (kernel == "sqex") {
-    cov.newx1 <- covar.sep(X1 = Xcand, d = f1$theta, g = g)
-    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand, d = f1$theta, g = 0)
+    cov.newx1 <- covar.sep(X1 = Xcand1, d = f1$theta, g = g)
+    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand1, d = f1$theta, g = 0)
   } else if (kernel == "matern1.5") {
-    cov.newx1 <- cor.sep(X = Xcand, theta = f1$theta, nu = 1.5)
-    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand, theta = f1$theta, nu = 1.5)
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 1.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 1.5)
   } else if (kernel == "matern2.5") {
-    cov.newx1 <- cor.sep(X = Xcand, theta = f1$theta, nu = 2.5)
-    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand, theta = f1$theta, nu = 2.5)
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 2.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 2.5)
   }
   v.next1 <- drop(cov.newx1 - t(cov.Xnewx1) %*% f1$Ki %*% cov.Xnewx1)
   g.next1 <- -1 / drop(v.next1) * f1$Ki %*% cov.Xnewx1
@@ -59,7 +59,7 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
     cbind(t(g.next1), 1 / drop(v.next1))
   )
 
-  fit1$X <- rbind(f1$X, Xcand)
+  fit1$X <- rbind(f1$X, Xcand1)
   attr(fit1$X, "scaled:center") <- x.center1
   attr(fit1$X, "scaled:scale") <- x.scale1
 
@@ -137,19 +137,19 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   } else if (kernel == "matern2.5") {
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
-  Xcand <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
 
   ### Choose level 1 ###
   ### update Ki1
   if (kernel == "sqex") {
-    cov.newx1 <- covar.sep(X1 = Xcand, d = f1$theta, g = g)
-    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand, d = f1$theta, g = 0)
+    cov.newx1 <- covar.sep(X1 = Xcand1, d = f1$theta, g = g)
+    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand1, d = f1$theta, g = 0)
   } else if (kernel == "matern1.5") {
-    cov.newx1 <- cor.sep(X = Xcand, theta = f1$theta, nu = 1.5)
-    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand, theta = f1$theta, nu = 1.5)
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 1.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 1.5)
   } else if (kernel == "matern2.5") {
-    cov.newx1 <- cor.sep(X = Xcand, theta = f1$theta, nu = 2.5)
-    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand, theta = f1$theta, nu = 2.5)
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 2.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 2.5)
   }
   v.next1 <- drop(cov.newx1 - t(cov.Xnewx1) %*% f1$Ki %*% cov.Xnewx1)
   g.next1 <- -1 / drop(v.next1) * f1$Ki %*% cov.Xnewx1
@@ -160,7 +160,321 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
     cbind(t(g.next1), 1 / drop(v.next1))
   )
 
-  fit1$X <- rbind(f1$X, Xcand)
+  fit1$X <- rbind(f1$X, Xcand1)
+  attr(fit1$X, "scaled:center") <- x.center1
+  attr(fit1$X, "scaled:scale") <- x.scale1
+
+  if (parallel) {
+    ALC.out <- foreach(i = 1:mc.sample, .combine = c) %dopar% {
+      fit.tmp <- fit
+      if (constant) {
+        fit1$y <- c(f1$y, y1.sample[i])
+      } else {
+        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        attr(fit1$y, "scaled:center") <- y.center1
+      }
+
+      fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
+
+      fit.tmp$fit1 <- fit1
+
+      ### Choose level 2 ###
+      if (kernel == "sqex") {
+        pred2 <- pred.GP(fit2, cbind(Xcand, y1.sample[i]))
+        y2.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+      } else if (kernel == "matern1.5") {
+        pred2 <- pred.matGP(fit2, cbind(Xcand, y1.sample[i]))
+        y2.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+      } else if (kernel == "matern2.5") {
+        pred2 <- pred.matGP(fit2, cbind(Xcand, y1.sample[i]))
+        y2.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+      }
+
+      ### update Ki2
+      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+
+      if (kernel == "sqex") {
+        cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
+        cov.Xnewx2 <- covar.sep(X1 = f2$X, X2 = newx2, d = f2$theta, g = 0)
+      } else if (kernel == "matern1.5") {
+        cov.newx2 <- cor.sep(X = newx2, theta = f2$theta, nu = 1.5)
+        cov.Xnewx2 <- cor.sep(X = f2$X, x = newx2, theta = f2$theta, nu = 1.5)
+      } else if (kernel == "matern2.5") {
+        cov.newx2 <- cor.sep(X = newx2, theta = f2$theta, nu = 2.5)
+        cov.Xnewx2 <- cor.sep(X = f2$X, x = newx2, theta = f2$theta, nu = 2.5)
+      }
+      v.next2 <- drop(cov.newx2 - t(cov.Xnewx2) %*% f2$Ki %*% cov.Xnewx2)
+      g.next2 <- -1 / drop(v.next2) * f2$Ki %*% cov.Xnewx2
+
+      fit2$Ki <- rbind(
+        cbind(f2$Ki + g.next2 %*% t(g.next2) * v.next2, g.next2),
+        cbind(t(g.next2), 1 / drop(v.next2))
+      )
+
+      fit2$X <- rbind(f2$X, newx2)
+      attr(fit2$X, "scaled:center") <- x.center2
+      attr(fit2$X, "scaled:scale") <- x.scale2
+
+      if (constant) {
+        fit2$y <- c(f2$y, y2.sample)
+      } else {
+        fit2$y <- c(f2$y, y2.sample - y.center2)
+        attr(fit2$y, "scaled:center") <- y.center2
+      }
+
+      fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
+
+      fit.tmp$fit2 <- fit2
+
+      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+    }
+  } else {
+    ALC.out <- rep(0, mc.sample)
+    for (i in 1:mc.sample) {
+      fit.tmp <- fit
+      if (constant) {
+        fit1$y <- c(f1$y, y1.sample[i])
+      } else {
+        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        attr(fit1$y, "scaled:center") <- y.center1
+      }
+
+      fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
+
+      fit.tmp$fit1 <- fit1
+
+      ### Choose level 2 ###
+      if (kernel == "sqex") {
+        pred2 <- pred.GP(fit2, cbind(Xcand, y1.sample[i]))
+        y2.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+      } else if (kernel == "matern1.5") {
+        pred2 <- pred.matGP(fit2, cbind(Xcand, y1.sample[i]))
+        y2.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+      } else if (kernel == "matern2.5") {
+        pred2 <- pred.matGP(fit2, cbind(Xcand, y1.sample[i]))
+        y2.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+      }
+
+      ### update Ki2
+      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+
+      if (kernel == "sqex") {
+        cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
+        cov.Xnewx2 <- covar.sep(X1 = f2$X, X2 = newx2, d = f2$theta, g = 0)
+      } else if (kernel == "matern1.5") {
+        cov.newx2 <- cor.sep(X = newx2, theta = f2$theta, nu = 1.5)
+        cov.Xnewx2 <- cor.sep(X = f2$X, x = newx2, theta = f2$theta, nu = 1.5)
+      } else if (kernel == "matern2.5") {
+        cov.newx2 <- cor.sep(X = newx2, theta = f2$theta, nu = 2.5)
+        cov.Xnewx2 <- cor.sep(X = f2$X, x = newx2, theta = f2$theta, nu = 2.5)
+      }
+      v.next2 <- drop(cov.newx2 - t(cov.Xnewx2) %*% f2$Ki %*% cov.Xnewx2)
+      g.next2 <- -1 / drop(v.next2) * f2$Ki %*% cov.Xnewx2
+
+      fit2$Ki <- rbind(
+        cbind(f2$Ki + g.next2 %*% t(g.next2) * v.next2, g.next2),
+        cbind(t(g.next2), 1 / drop(v.next2))
+      )
+
+      fit2$X <- rbind(f2$X, newx2)
+      attr(fit2$X, "scaled:center") <- x.center2
+      attr(fit2$X, "scaled:scale") <- x.scale2
+
+      if (constant) {
+        fit2$y <- c(f2$y, y2.sample)
+      } else {
+        fit2$y <- c(f2$y, y2.sample - y.center2)
+        attr(fit2$y, "scaled:center") <- y.center2
+      }
+
+      fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
+
+      fit.tmp$fit2 <- fit2
+
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+    }
+  }
+
+  return(mean(ALC.out))
+}
+
+
+#' object to optimize the next point by ALC criterion updating at level 1 with three levels of fidelity
+#'
+#' @param Xcand candidate data point to be optimized.
+#' @param Xref vector or matrix of reference data.
+#' @param fit an object of class RNAmf.
+#' @param mc.sample a number of mc samples generated for this approach. Default is 100.
+#' @param parallel logical indicating whether to run parallel or not. Default is FALSE.
+#' @param ncore the number of core for parallel. Default is 1.
+#' @return A mean of the deduced variance at Xref.
+#' @importFrom plgp covar.sep
+#' @importFrom stats rnorm
+#' @noRd
+#'
+
+obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
+  fit_two_level <- fit$fit.RNAmf_two_level
+  fit1 <- f1 <- fit_two_level$fit1
+  fit2 <- f2 <- fit_two_level$fit2
+  fit3 <- f3 <- fit$fit3
+  constant <- fit$constant
+  kernel <- fit$kernel
+  g <- fit1$g
+
+  x.center1 <- attr(fit1$X, "scaled:center")
+  x.scale1 <- attr(fit1$X, "scaled:scale")
+  y.center1 <- attr(fit1$y, "scaled:center")
+
+  x.center2 <- attr(fit2$X, "scaled:center")
+  x.scale2 <- attr(fit2$X, "scaled:scale")
+  y.center2 <- attr(fit2$y, "scaled:center")
+
+  x.center3 <- attr(fit3$X, "scaled:center")
+  x.scale3 <- attr(fit3$X, "scaled:scale")
+  y.center3 <- attr(fit3$y, "scaled:center")
+
+  Xcand <- matrix(Xcand, nrow = 1)
+  if (kernel == "sqex") {
+    y1.sample <- rnorm(mc.sample, mean = pred.GP(f1, Xcand)$mu, sd = sqrt(pred.GP(f1, Xcand)$sig2))
+  } else if (kernel == "matern1.5") {
+    y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
+  } else if (kernel == "matern2.5") {
+    y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
+  }
+  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+
+  ### Choose level 1 ###
+  ### update Ki1
+  if (kernel == "sqex") {
+    cov.newx1 <- covar.sep(X1 = Xcand1, d = f1$theta, g = g)
+    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand1, d = f1$theta, g = 0)
+  } else if (kernel == "matern1.5") {
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 1.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 1.5)
+  } else if (kernel == "matern2.5") {
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 2.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 2.5)
+  }
+  v.next1 <- drop(cov.newx1 - t(cov.Xnewx1) %*% f1$Ki %*% cov.Xnewx1)
+  g.next1 <- -1 / drop(v.next1) * f1$Ki %*% cov.Xnewx1
+
+
+  fit1$Ki <- rbind(
+    cbind(f1$Ki + g.next1 %*% t(g.next1) * v.next1, g.next1),
+    cbind(t(g.next1), 1 / drop(v.next1))
+  )
+
+  fit1$X <- rbind(f1$X, Xcand1)
+  attr(fit1$X, "scaled:center") <- x.center1
+  attr(fit1$X, "scaled:scale") <- x.scale1
+
+  if (parallel) {
+    ALC.out <- foreach(i = 1:mc.sample, .combine = c) %dopar% {
+      fit.tmp <- fit
+      if (constant) {
+        fit1$y <- c(f1$y, y1.sample[i])
+      } else {
+        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        attr(fit1$y, "scaled:center") <- y.center1
+      }
+
+      fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
+
+      fit.tmp$fit1 <- fit1
+
+      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+    }
+  } else {
+    ALC.out <- rep(0, mc.sample)
+    for (i in 1:mc.sample) {
+      fit.tmp <- fit
+      if (constant) {
+        fit1$y <- c(f1$y, y1.sample[i])
+      } else {
+        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        attr(fit1$y, "scaled:center") <- y.center1
+      }
+
+      fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
+
+      fit.tmp$fit1 <- fit1
+
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+    }
+  }
+
+  return(mean(ALC.out))
+}
+
+
+#' object to optimize the next point by ALC criterion updating at level 2 with three levels of fidelity
+#'
+#' @param Xcand candidate data point to be optimized.
+#' @param Xref vector or matrix of reference data.
+#' @param fit an object of class RNAmf.
+#' @param mc.sample a number of mc samples generated for this approach. Default is 100.
+#' @param parallel logical indicating whether to run parallel or not. Default is FALSE.
+#' @param ncore the number of core for parallel. Default is 1.
+#' @return A mean of the deduced variance at Xref.
+#' @importFrom plgp covar.sep
+#' @importFrom stats rnorm
+#' @noRd
+#'
+
+obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
+  fit_two_level <- fit$fit.RNAmf_two_level
+  fit1 <- f1 <- fit_two_level$fit1
+  fit2 <- f2 <- fit_two_level$fit2
+  fit3 <- f3 <- fit$fit3
+  constant <- fit$constant
+  kernel <- fit$kernel
+  g <- fit1$g
+
+  x.center1 <- attr(fit1$X, "scaled:center")
+  x.scale1 <- attr(fit1$X, "scaled:scale")
+  y.center1 <- attr(fit1$y, "scaled:center")
+
+  x.center2 <- attr(fit2$X, "scaled:center")
+  x.scale2 <- attr(fit2$X, "scaled:scale")
+  y.center2 <- attr(fit2$y, "scaled:center")
+
+  x.center3 <- attr(fit3$X, "scaled:center")
+  x.scale3 <- attr(fit3$X, "scaled:scale")
+  y.center3 <- attr(fit3$y, "scaled:center")
+
+  Xcand <- matrix(Xcand, nrow = 1)
+  if (kernel == "sqex") {
+    y1.sample <- rnorm(mc.sample, mean = pred.GP(f1, Xcand)$mu, sd = sqrt(pred.GP(f1, Xcand)$sig2))
+  } else if (kernel == "matern1.5") {
+    y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
+  } else if (kernel == "matern2.5") {
+    y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
+  }
+  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+
+  ### Choose level 1 ###
+  ### update Ki1
+  if (kernel == "sqex") {
+    cov.newx1 <- covar.sep(X1 = Xcand1, d = f1$theta, g = g)
+    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand1, d = f1$theta, g = 0)
+  } else if (kernel == "matern1.5") {
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 1.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 1.5)
+  } else if (kernel == "matern2.5") {
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 2.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 2.5)
+  }
+  v.next1 <- drop(cov.newx1 - t(cov.Xnewx1) %*% f1$Ki %*% cov.Xnewx1)
+  g.next1 <- -1 / drop(v.next1) * f1$Ki %*% cov.Xnewx1
+
+
+  fit1$Ki <- rbind(
+    cbind(f1$Ki + g.next1 %*% t(g.next1) * v.next1, g.next1),
+    cbind(t(g.next1), 1 / drop(v.next1))
+  )
+
+  fit1$X <- rbind(f1$X, Xcand1)
   attr(fit1$X, "scaled:center") <- x.center1
   attr(fit1$X, "scaled:scale") <- x.scale1
 
@@ -313,7 +627,7 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 #' @noRd
 #'
 
-obj.ALC_level_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
+obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
   fit_two_level <- fit$fit.RNAmf_two_level
   fit1 <- f1 <- fit_two_level$fit1
   fit2 <- f2 <- fit_two_level$fit2
@@ -342,19 +656,19 @@ obj.ALC_level_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   } else if (kernel == "matern2.5") {
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
-  Xcand <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
 
   ### Choose level 1 ###
   ### update Ki1
   if (kernel == "sqex") {
-    cov.newx1 <- covar.sep(X1 = Xcand, d = f1$theta, g = g)
-    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand, d = f1$theta, g = 0)
+    cov.newx1 <- covar.sep(X1 = Xcand1, d = f1$theta, g = g)
+    cov.Xnewx1 <- covar.sep(X1 = f1$X, X2 = Xcand1, d = f1$theta, g = 0)
   } else if (kernel == "matern1.5") {
-    cov.newx1 <- cor.sep(X = Xcand, theta = f1$theta, nu = 1.5)
-    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand, theta = f1$theta, nu = 1.5)
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 1.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 1.5)
   } else if (kernel == "matern2.5") {
-    cov.newx1 <- cor.sep(X = Xcand, theta = f1$theta, nu = 2.5)
-    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand, theta = f1$theta, nu = 2.5)
+    cov.newx1 <- cor.sep(X = Xcand1, theta = f1$theta, nu = 2.5)
+    cov.Xnewx1 <- cor.sep(X = f1$X, x = Xcand1, theta = f1$theta, nu = 2.5)
   }
   v.next1 <- drop(cov.newx1 - t(cov.Xnewx1) %*% f1$Ki %*% cov.Xnewx1)
   g.next1 <- -1 / drop(v.next1) * f1$Ki %*% cov.Xnewx1
@@ -365,7 +679,7 @@ obj.ALC_level_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
     cbind(t(g.next1), 1 / drop(v.next1))
   )
 
-  fit1$X <- rbind(f1$X, Xcand)
+  fit1$X <- rbind(f1$X, Xcand1)
   attr(fit1$X, "scaled:center") <- x.center1
   attr(fit1$X, "scaled:scale") <- x.scale1
 
@@ -433,18 +747,18 @@ obj.ALC_level_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 
       ### Choose level 3 ###
       if (kernel == "sqex") {
-        pred3 <- pred.GP(fit2, cbind(Xcand, y2.sample[i]))
-        y3.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+        pred3 <- pred.GP(fit2, cbind(Xcand, y2.sample))
+        y3.sample <- rnorm(1, pred3$mu, sqrt(pred3$sig2))
       } else if (kernel == "matern1.5") {
-        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample[i]))
-        y3.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample))
+        y3.sample <- rnorm(1, pred3$mu, sqrt(pred3$sig2))
       } else if (kernel == "matern2.5") {
-        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample[i]))
-        y3.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample))
+        y3.sample <- rnorm(1, pred3$mu, sqrt(pred3$sig2))
       }
 
       ### update Ki2
-      newx3 <- scale_inputs(cbind(Xcand, y2.sample[i]), x.center3, x.scale3)
+      newx3 <- scale_inputs(cbind(Xcand, y2.sample), x.center3, x.scale3)
 
       if (kernel == "sqex") {
         cov.newx3 <- covar.sep(X1 = newx3, d = f3$theta, g = g)
@@ -546,18 +860,18 @@ obj.ALC_level_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 
       ### Choose level 3 ###
       if (kernel == "sqex") {
-        pred3 <- pred.GP(fit2, cbind(Xcand, y2.sample[i]))
-        y3.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+        pred3 <- pred.GP(fit2, cbind(Xcand, y2.sample))
+        y3.sample <- rnorm(1, pred3$mu, sqrt(pred3$sig2))
       } else if (kernel == "matern1.5") {
-        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample[i]))
-        y3.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample))
+        y3.sample <- rnorm(1, pred3$mu, sqrt(pred3$sig2))
       } else if (kernel == "matern2.5") {
-        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample[i]))
-        y3.sample <- rnorm(1, pred2$mu, sqrt(pred2$sig2))
+        pred3 <- pred.matGP(fit2, cbind(Xcand, y2.sample))
+        y3.sample <- rnorm(1, pred3$mu, sqrt(pred3$sig2))
       }
 
       ### update Ki2
-      newx3 <- scale_inputs(cbind(Xcand, y2.sample[i]), x.center3, x.scale3)
+      newx3 <- scale_inputs(cbind(Xcand, y2.sample), x.center3, x.scale3)
 
       if (kernel == "sqex") {
         cov.newx3 <- covar.sep(X1 = newx3, d = f3$theta, g = g)
@@ -636,7 +950,7 @@ obj.ALC_level_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 #' \frac{\Delta \sigma_L^{2}(l,\bm{x})}{\sum^l_{j=1}C_j}}.
 #'
 #'
-#' @param Xref vector or matrix of reference location to approximate the integral of ALC. If \code{Xref=NULL}, \eqn{100 \times d} points are generated by Latin hypercube design. Default is \code{NULL}.
+#' @param Xref vector or matrix of reference location to approximate the integral of ALC. If \code{Xref=NULL}, \eqn{100 \times d} points from 0 to 1 are generated by Latin hypercube design. Default is \code{NULL}.
 #' @param Xcand vector or matrix of candidate set which could be added into the current design only when \code{optim=FALSE}. \code{Xcand} is the set of the points where ALC criterion is evaluated. If \code{Xcand=NULL}, \code{Xref} is used. Default is \code{NULL}. See details.
 #' @param fit object of class \code{RNAmf}.
 #' @param mc.sample a number of mc samples generated for the imputation through MC approximation. Default is \code{100}.
@@ -790,11 +1104,9 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       if (is.null(Xcand)){
         Xcand <- Xref
       }else if(is.null(dim(Xcand))){
-        Xcand <- matrix(Xcand, ncol = 1)
+        Xcand <- matrix(Xcand, ncol = ncol(fit1$X))
       }
     }
-    # if (is.null(Xcand)) Xcand <- maximinLHS(n.start, ncol(fit1$X))
-    # Xcand <- matrix(Xcand, ncol = ncol(fit1$X))
     # if (ncol(Xcand) != dim(fit$fit1$X)[2]) stop("The dimension of candidate set should be equal to the dimension of the design")
 
     ### Calculate the deduced variance ###
@@ -851,7 +1163,7 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
         Xnext <- Xnext.1
       }
     } else {
-      ALCvalue <- c(Icurrent - which.min(intvar1), Icurrent - which.min(intvar2)) / c(cost[1], cost[1] + cost[2])
+      ALCvalue <- c(Icurrent - min(intvar1), Icurrent - min(intvar2)) / c(cost[1], cost[1] + cost[2])
       if (ALCvalue[2] > ALCvalue[1]) {
         level <- 2
         Xnext <- matrix(Xcand[which.min(intvar2), ], nrow = 1)
@@ -866,51 +1178,6 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       "Xnext" = Xnext
     ) # next point
 
-
-    # ### Update the model ###
-    # newx <- matrix(chosen$Xnext, nrow=1)
-    # level <- chosen$level
-    #
-    # X1 <- scale_inputs(fit1$X, x.center1, x.scale1, back=TRUE)
-    # X2 <- matrix(scale_inputs(fit2$X, x.center2, x.scale2, back=TRUE)[,-ncol(fit2$X)], ncol=ncol(fit2$X)-1)
-    #
-    # if(constant){
-    #   y1 <- fit1$y
-    #   y2 <- fit2$y
-    # }else{
-    #   y1 <- fit1$y+attr(fit1$y,"scaled:center")
-    #   y2 <- fit2$y+attr(fit2$y,"scaled:center")
-    # }
-    #
-    #
-    # ### Choose level 1 ###
-    # if(level == 1){
-    #   y1.select <- funcs[[1]](newx)
-    #
-    #   X1 <- rbind(X1, newx)
-    #   y1 <- c(y1, y1.select)
-    # }
-    #
-    # ### Choose level 2 ###
-    # if(level == 2){
-    #   if(checknested(scale_inputs(fit1$X, x.center1, x.scale1, back=TRUE), chosen$Xnext)==TRUE &
-    #      checknested(scale_inputs(fit2$X, x.center2, x.scale2, back=TRUE), chosen$Xnext)==FALSE){
-    #     y2.select <- funcs[[2]](newx)
-    #
-    #     X2 <- rbind(X2, newx)
-    #     y2 <- c(y2, y2.select)
-    #   }else{
-    #     y1.select <- funcs[[1]](newx)
-    #     y2.select <- funcs[[2]](newx)
-    #
-    #     X1 <- rbind(X1, newx)
-    #     y1 <- c(y1, y1.select)
-    #     X2 <- rbind(X2, newx)
-    #     y2 <- c(y2, y2.select)
-    #   }
-    # }
-    #
-    # fit <- RNAmf_two_level(X1, y1, X2, y2, kernel=kernel, constant=constant)
     ALC <- list(ALC1 = intvar1 / cost[1], ALC2 = intvar2 / (cost[1] + cost[2]))
   } else if (fit$level == 3) { # level 3
 
@@ -952,11 +1219,9 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       if (is.null(Xcand)){
         Xcand <- Xref
       }else if(is.null(dim(Xcand))){
-        Xcand <- matrix(Xcand, ncol = 1)
+        Xcand <- matrix(Xcand, ncol = ncol(fit1$X))
       }
     }
-    # if (is.null(Xcand)) Xcand <- maximinLHS(n.start, ncol(fit1$X))
-    # Xcand <- matrix(Xcand, ncol = ncol(fit1$X))
     # if (ncol(Xcand) != dim(fit$fit1$X)[2]) stop("The dimension of candidate set should be equal to the dimension of the design")
 
     ### Calculate the deduced variance ###
@@ -967,14 +1232,14 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
         newx <- matrix(Xcand[i, ], nrow = 1)
 
         return(c(
-          obj.ALC_level_1(newx, Xref, fit_two_level, mc.sample),
-          obj.ALC_level_2(newx, Xref, fit_two_level, mc.sample),
-          obj.ALC_level_3(newx, Xref, fit, mc.sample)
+          obj.ALC_level_3_1(newx, Xref, fit, mc.sample),
+          obj.ALC_level_3_2(newx, Xref, fit, mc.sample),
+          obj.ALC_level_3_3(newx, Xref, fit, mc.sample)
         ))
       }
       intvar1 <- as.matrix(pseudointvar)[1, ]
       intvar2 <- as.matrix(pseudointvar)[2, ]
-      intvar2 <- as.matrix(pseudointvar)[3, ]
+      intvar3 <- as.matrix(pseudointvar)[3, ]
     } else {
       intvar1 <- c(rep(0, nrow(Xcand))) # IMSPE candidates
       intvar2 <- c(rep(0, nrow(Xcand))) # IMSPE candidates
@@ -983,9 +1248,9 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
         print(paste(i, nrow(Xcand), sep = "/"))
         newx <- matrix(Xcand[i, ], nrow = 1)
 
-        intvar1[i] <- obj.ALC_level_1(newx, Xref, fit_two_level, mc.sample)
-        intvar2[i] <- obj.ALC_level_2(newx, Xref, fit_two_level, mc.sample)
-        intvar3[i] <- obj.ALC_level_3(newx, Xref, fit, mc.sample)
+        intvar1[i] <- obj.ALC_level_3_1(newx, Xref, fit, mc.sample)
+        intvar2[i] <- obj.ALC_level_3_2(newx, Xref, fit, mc.sample)
+        intvar3[i] <- obj.ALC_level_3_3(newx, Xref, fit, mc.sample)
       }
     }
     print(proc.time()[3] - time.start)
@@ -995,7 +1260,7 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       cat("running optim for level 1: \n")
       time.start <- proc.time()[3]
       X.start <- matrix(Xcand[which.min(intvar1), ], nrow = 1)
-      optim.out <- optim(X.start, obj.ALC_level_1, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit_two_level, Xref = Xref, mc.sample = mc.sample, parallel = parallel, ncore = ncore)
+      optim.out <- optim(X.start, obj.ALC_level_3_1, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit, Xref = Xref, mc.sample = mc.sample, parallel = parallel, ncore = ncore)
       Xnext.1 <- optim.out$par
       ALC.1 <- optim.out$value
       print(proc.time()[3] - time.start)
@@ -1003,7 +1268,7 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       cat("running optim for level 2: \n")
       time.start <- proc.time()[3]
       X.start <- matrix(Xcand[which.min(intvar2), ], nrow = 1)
-      optim.out <- optim(X.start, obj.ALC_level_2, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit_two_level, Xref = Xref, mc.sample = mc.sample, parallel = parallel, ncore = ncore)
+      optim.out <- optim(X.start, obj.ALC_level_3_2, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit, Xref = Xref, mc.sample = mc.sample, parallel = parallel, ncore = ncore)
       Xnext.2 <- optim.out$par
       ALC.2 <- optim.out$value
       print(proc.time()[3] - time.start)
@@ -1011,7 +1276,7 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       cat("running optim for level 3: \n")
       time.start <- proc.time()[3]
       X.start <- matrix(Xcand[which.min(intvar3), ], nrow = 1)
-      optim.out <- optim(X.start, obj.ALC_level_3, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit, Xref = Xref, mc.sample = mc.sample, parallel = parallel, ncore = ncore)
+      optim.out <- optim(X.start, obj.ALC_level_3_3, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit, Xref = Xref, mc.sample = mc.sample, parallel = parallel, ncore = ncore)
       Xnext.3 <- optim.out$par
       ALC.3 <- optim.out$value
       print(proc.time()[3] - time.start)
@@ -1028,7 +1293,7 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
         Xnext <- Xnext.1
       }
     } else {
-      ALCvalue <- c(Icurrent - which.min(intvar1), Icurrent - which.min(intvar2), Icurrent - which.min(intvar3)) / c(cost[1], cost[1] + cost[2], cost[1] + cost[2] + cost[3])
+      ALCvalue <- c(Icurrent - min(intvar1), Icurrent - min(intvar2), Icurrent - min(intvar3)) / c(cost[1], cost[1] + cost[2], cost[1] + cost[2] + cost[3])
       if (ALCvalue[3] > ALCvalue[2]) {
         level <- 3
         Xnext <- matrix(Xcand[which.min(intvar3), ], nrow = 1)
@@ -1046,87 +1311,6 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
       "Xnext" = Xnext
     ) # next point
 
-
-    # ### Update the model ###
-    # newx <- matrix(chosen$Xnext, nrow=1)
-    # level <- chosen$level
-    #
-    # X1 <- scale_inputs(fit1$X, x.center1, x.scale1, back=TRUE)
-    # X2 <- matrix(scale_inputs(fit2$X, x.center2, x.scale2, back=TRUE)[,-ncol(fit2$X)], ncol=ncol(fit2$X)-1)
-    # X3 <- matrix(scale_inputs(fit3$X, x.center3, x.scale3, back=TRUE)[,-ncol(fit3$X)], ncol=ncol(fit3$X)-1)
-    #
-    # if(constant){
-    #   y1 <- fit1$y
-    #   y2 <- fit2$y
-    #   y3 <- fit3$y
-    # }else{
-    #   y1 <- fit1$y+attr(fit1$y,"scaled:center")
-    #   y2 <- fit2$y+attr(fit2$y,"scaled:center")
-    #   y3 <- fit3$y+attr(fit3$y,"scaled:center")
-    # }
-    #
-    #
-    # ### Choose level 1 ###
-    # if(level == 1){
-    #   y1.select <- funcs[[1]](newx)
-    #
-    #   X1 <- rbind(X1, newx)
-    #   y1 <- c(y1, y1.select)
-    # }
-    #
-    # ### Choose level 2 ###
-    # if(level == 2){
-    #   if(checknested(scale_inputs(fit1$X, x.center1, x.scale1, back=TRUE), chosen$Xnext)==TRUE &
-    #      checknested(scale_inputs(fit2$X, x.center2, x.scale2, back=TRUE), chosen$Xnext)==FALSE){
-    #     y2.select <- funcs[[2]](newx)
-    #
-    #     X2 <- rbind(X2, newx)
-    #     y2 <- c(y2, y2.select)
-    #   }else{
-    #     y1.select <- funcs[[1]](newx)
-    #     y2.select <- funcs[[2]](newx)
-    #
-    #     X1 <- rbind(X1, newx)
-    #     y1 <- c(y1, y1.select)
-    #     X2 <- rbind(X2, newx)
-    #     y2 <- c(y2, y2.select)
-    #   }
-    # }
-    #
-    # ### Choose level 3 ###
-    # if(level == 3){
-    #   if(checknested(scale_inputs(fit1$X, x.center1, x.scale1, back=TRUE), chosen$Xnext)==TRUE &
-    #      checknested(scale_inputs(fit2$X, x.center2, x.scale2, back=TRUE), chosen$Xnext)==TRUE &
-    #      checknested(scale_inputs(fit3$X, x.center3, x.scale3, back=TRUE), chosen$Xnext)==FALSE){
-    #     y3.select <- funcs[[3]](newx)
-    #
-    #     X3 <- rbind(X3, newx)
-    #     y3 <- c(y3, y3.select)
-    #   }else if(checknested(scale_inputs(fit1$X, x.center1, x.scale1, back=TRUE), chosen$Xnext)==TRUE &
-    #            checknested(scale_inputs(fit2$X, x.center2, x.scale2, back=TRUE), chosen$Xnext)==FALSE &
-    #            checknested(scale_inputs(fit3$X, x.center3, x.scale3, back=TRUE), chosen$Xnext)==FALSE){
-    #     y2.select <- funcs[[2]](newx)
-    #     y3.select <- funcs[[3]](newx)
-    #
-    #     X2 <- rbind(X2, newx)
-    #     y2 <- c(y2, y2.select)
-    #     X3 <- rbind(X3, newx)
-    #     y3 <- c(y3, y3.select)
-    #   }else{
-    #     y1.select <- funcs[[1]](newx)
-    #     y2.select <- funcs[[2]](newx)
-    #     y3.select <- funcs[[3]](newx)
-    #
-    #     X1 <- rbind(X1, newx)
-    #     y1 <- c(y1, y1.select)
-    #     X2 <- rbind(X2, newx)
-    #     y2 <- c(y2, y2.select)
-    #     X3 <- rbind(X3, newx)
-    #     y3 <- c(y3, y3.select)
-    #   }
-    # }
-    #
-    # fit <- RNAmf_three_level(X1, y1, X2, y2, X3, y3, kernel=kernel, constant=constant)
     ALC <- list(ALC1 = intvar1 / cost[1], ALC2 = intvar2 / (cost[1] + cost[2]), ALC3 = intvar3 / (cost[1] + cost[2] + cost[3]))
   } else {
     stop("level is missing")
