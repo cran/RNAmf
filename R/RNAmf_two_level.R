@@ -47,6 +47,43 @@
 #' }
 #' @usage RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex", constant = TRUE, ...)
 #' @export
+#' @examples
+#' \donttest{
+#' ### two levels example ###
+#' library(lhs)
+#'
+#' ### Perdikaris function ###
+#' f1 <- function(x) {
+#'   sin(8 * pi * x)
+#' }
+#'
+#' f2 <- function(x) {
+#'   (x - sqrt(2)) * (sin(8 * pi * x))^2
+#' }
+#'
+#' ### training data ###
+#' n1 <- 13
+#' n2 <- 8
+#'
+#' ### fix seed to reproduce the result ###
+#' set.seed(1)
+#'
+#' ### generate initial nested design ###
+#' X <- NestedX(c(n1, n2), 1)
+#' X1 <- X[[1]]
+#' X2 <- X[[2]]
+#'
+#' ### n1 and n2 might be changed from NestedX ###
+#' ### assign n1 and n2 again ###
+#' n1 <- nrow(X1)
+#' n2 <- nrow(X2)
+#'
+#' y1 <- f1(X1)
+#' y2 <- f2(X2)
+#'
+#' ### fit an RNAmf ###
+#' fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+#'}
 #'
 
 RNAmf_two_level <- function(X1, y1, X2, y2, kernel = "sqex", constant = TRUE, ...) {

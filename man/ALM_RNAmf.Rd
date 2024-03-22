@@ -34,6 +34,8 @@ It calculates the ALM criterion \eqn{\frac{\sigma^{*2}_l(\bm{x})}{\sum^l_{j=1}C_
 where \eqn{\sigma^{*2}_l(\bm{x})} is the posterior predictive variance
 at each fidelity level \eqn{l} and \eqn{C_j} is the simulation cost at level \eqn{j}.
 For details, see Heo and Sung (2023+, <arXiv:2309.11772>).
+
+A new point is acquired on \code{Xcand}. If \code{Xcand=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 }
 \examples{
 \donttest{

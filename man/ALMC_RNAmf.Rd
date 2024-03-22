@@ -47,6 +47,8 @@ it finds the optimal fidelity level by maximizing ALC criterion at \eqn{\bm{x^*}
 where \eqn{C_j} is the simulation cost at level \eqn{j}.
 See \code{\link{ALC_RNAmf}}.
 For details, see Heo and Sung (2023+, <arXiv:2309.11772>).
+
+A new point is acquired on \code{Xcand}. If \code{Xcand=NULL} and \code{Xref=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 }
 \examples{
 \donttest{

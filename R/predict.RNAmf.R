@@ -1,4 +1,4 @@
-#' prediction of the RNAmf emulator with 2 or 3 fidelity levels.
+#' @title prediction of the RNAmf emulator with 2 or 3 fidelity levels.
 #'
 #' @description The function computes the posterior mean and variance of RNA models with two or three fidelity levels
 #' by fitted model using \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}}.
@@ -24,7 +24,6 @@
 #' @importFrom plgp distance
 #' @importFrom stats predict
 #' @rdname predict
-#' @title predict
 #' @method predict RNAmf
 #' @export
 #' @examples

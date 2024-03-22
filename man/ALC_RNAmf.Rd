@@ -45,6 +45,8 @@ and \eqn{\tilde{\sigma}_L^{*2}(\bm{\xi};l,\bm{x})} is the posterior variance
 based on the augmented design combining the current design and a new input location \eqn{\bm{x}}
 at each fidelity level lower than or equal to \eqn{l}.
 The integration is approximated by MC integration using uniform reference samples.
+
+A new point is acquired on \code{Xcand}. If \code{Xcand=NULL} and \code{Xref=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 }
 \details{
 \code{Xref} plays a role of \eqn{\bm{\xi}} to approximate the integration.

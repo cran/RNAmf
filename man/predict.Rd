@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.RNAmf.R
 \name{predict.RNAmf}
 \alias{predict.RNAmf}
-\title{predict}
+\title{prediction of the RNAmf emulator with 2 or 3 fidelity levels.}
 \usage{
 \method{predict}{RNAmf}(object, x, ...)
 }
@@ -25,8 +25,6 @@ The function computes the posterior mean and variance of RNA models with two or 
 by fitted model using \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}}.
 }
 \details{
-prediction of the RNAmf emulator with 2 or 3 fidelity levels.
-
 From the model fitted by \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}},
 the posterior mean and variance are calculated based on the closed form expression derived by a recursive fashion.
 The formulas depend on its kernel choices.

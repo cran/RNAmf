@@ -64,6 +64,61 @@ for Matern kernel with the smoothness parameter of 2.5; \code{kernel="matern2.5"
 
 For details, see Heo and Sung (2023+, <arXiv:2309.11772>).
 }
+\examples{
+\donttest{
+### three levels example ###
+library(lhs)
+
+### Branin function ###
+branin <- function(xx, l){
+  x1 <- xx[1]
+  x2 <- xx[2]
+  if(l == 1){
+    10*sqrt((-1.275*(1.2*x1+0.4)^2/pi^2+5*(1.2*x1+0.4)/pi+(1.2*x2+0.4)-6)^2 +
+    (10-5/(4*pi))*cos((1.2*x1+0.4))+ 10) + 2*(1.2*x1+1.9) - 3*(3*(1.2*x2+2.4)-1) - 1 - 3*x2 + 1
+  }else if(l == 2){
+    10*sqrt((-1.275*(x1+2)^2/pi^2+5*(x1+2)/pi+(x2+2)-6)^2 +
+    (10-5/(4*pi))*cos((x1+2))+ 10) + 2*(x1-0.5) - 3*(3*x2-1) - 1
+  }else if(l == 3){
+    (-1.275*x1^2/pi^2+5*x1/pi+x2-6)^2 + (10-5/(4*pi))*cos(x1)+ 10
+  }
+}
+
+output.branin <- function(x, l){
+  factor_range <- list("x1" = c(-5, 10), "x2" = c(0, 15))
+
+  for(i in 1:length(factor_range)) x[i] <- factor_range[[i]][1] + x[i] * diff(factor_range[[i]])
+  branin(x[1:2], l)
+}
+
+### training data ###
+n1 <- 20; n2 <- 15; n3 <- 10
+
+### fix seed to reproduce the result ###
+set.seed(1)
+
+### generate initial nested design ###
+X <- NestedX(c(n1, n2, n3), 2)
+X1 <- X[[1]]
+X2 <- X[[2]]
+X3 <- X[[3]]
+
+### n1, n2 and n3 might be changed from NestedX ###
+### assign n1, n2 and n3 again ###
+n1 <- nrow(X1)
+n2 <- nrow(X2)
+n3 <- nrow(X3)
+
+y1 <- apply(X1,1,output.branin, l=1)
+y2 <- apply(X2,1,output.branin, l=2)
+y3 <- apply(X3,1,output.branin, l=3)
+
+### fit an RNAmf ###
+fit.RNAmf <- RNAmf_three_level(X1, y1, X2, y2, X3, y3, kernel = "sqex")
+}
+
+
+}
 \seealso{
 \code{\link{predict.RNAmf}} for prediction.
 }
