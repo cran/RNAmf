@@ -28,7 +28,7 @@ by fitted model using \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_l
 From the model fitted by \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}},
 the posterior mean and variance are calculated based on the closed form expression derived by a recursive fashion.
 The formulas depend on its kernel choices.
-For details, see Heo and Sung (2023+, <arXiv:2309.11772>).
+For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 }
 \examples{
 \donttest{

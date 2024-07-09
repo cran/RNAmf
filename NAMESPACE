@@ -2,6 +2,7 @@
 
 S3method(predict,RNAmf)
 export(ALC_RNAmf)
+export(ALD_RNAmf)
 export(ALMC_RNAmf)
 export(ALM_RNAmf)
 export(NestedX)
@@ -20,3 +21,4 @@ importFrom(stats,pnorm)
 importFrom(stats,predict)
 importFrom(stats,quantile)
 importFrom(stats,rnorm)
+importFrom(stats,var)

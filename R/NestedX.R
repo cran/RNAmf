@@ -44,7 +44,7 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
 #' @references
 #' L. Le Gratiet and J. Garnier (2014). Recursive co-kriging model for design of computer experiments
 #' with multiple levels of fidelity. \emph{International Journal for Uncertainty Quantification}, 4(5), 365-386;
-#' doi:10.1615/Int.J.UncertaintyQuantification.2014006914
+#' \doi{doi:10.1615/Int.J.UncertaintyQuantification.2014006914}
 #'
 #' @param n vector of the number of design points at each fidelity level \eqn{l}. Thus, the vector must have a positive value \eqn{n_1, n_2} or \eqn{n_1, n_2, n_3} where \eqn{n_1 > n_2 > n_3}.
 #' @param d constant of the dimension of the design.

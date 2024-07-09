@@ -122,10 +122,10 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
       return(c(lower, upper))
     }
 
-    # hetGP way * 10^(d*2/3)
+    # hetGP way * 10^(d*3/4)
     XX <- (X - matrix(apply(X, 2, range)[1, ], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1 / (apply(X, 2, range)[2, ] - apply(X, 2, range)[1, ]), ncol(X))
-    lower <- max(10^(ncol(XX) * 2 / 3) * apply(XX, 2, parbound)[1, ], 0.2)
-    upper <- 10^(ncol(XX) * 2 / 3) * apply(XX, 2, parbound)[2, ]
+    lower <- pmax(10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[1, ], 0.2)
+    upper <- 10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[2, ]
     init <- sqrt(lower * upper)
 
     # # hetGP way
@@ -206,10 +206,10 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
       return(c(lower, upper))
     }
 
-    # hetGP way * 10^(d*2/3)
+    # hetGP way * 10^(d*3/4)
     XX <- (X - matrix(apply(X, 2, range)[1, ], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1 / (apply(X, 2, range)[2, ] - apply(X, 2, range)[1, ]), ncol(X))
-    lower <- max(10^(ncol(XX) * 2 / 3) * apply(XX, 2, parbound)[1, ], 0.2)
-    upper <- 10^(ncol(XX) * 2 / 3) * apply(XX, 2, parbound)[2, ]
+    lower <- pmax(10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[1, ], 0.2)
+    upper <- 10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[2, ]
     init <- sqrt(lower * upper)
 
     # # hetGP way

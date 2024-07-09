@@ -27,7 +27,7 @@
 #' \eqn{\phi(x, x';\theta) = \left( 1+\frac{\sqrt{5}|x-x'|}{\theta} +\frac{5(x-x')^2}{3\theta^2} \right) \exp \left( -\frac{\sqrt{5}|x-x'|}{\theta} \right)}
 #' for Matern kernel with the smoothness parameter of 2.5; \code{kernel="matern2.5"}.
 #'
-#' For details, see Heo and Sung (2023+, <arXiv:2309.11772>).
+#' For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 #'
 #' @param X1 vector or matrix of input locations for the low fidelity level.
 #' @param y1 vector of response values for the low fidelity level.

@@ -8,7 +8,7 @@
 #' @details From the model fitted by \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}},
 #' the posterior mean and variance are calculated based on the closed form expression derived by a recursive fashion.
 #' The formulas depend on its kernel choices.
-#' For details, see Heo and Sung (2023+, <arXiv:2309.11772>).
+#' For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 #'
 #' @param object a class \code{RNAmf} object fitted by \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}}.
 #' @param x vector or matrix of new input locations to predict.
@@ -158,7 +158,7 @@
 #' print(predsig2)}
 #'
 predict.RNAmf <- function(object, x, ...) {
-  t1 <- proc.time()[3]
+  t1 <- proc.time()
   ### check the object ###
   if (!inherits(object, "RNAmf")) {
     stop("The object is not of class \"RNAmf\" \n")
@@ -198,14 +198,14 @@ predict.RNAmf <- function(object, x, ...) {
 
         # mean
         predy <- mu2 + (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
-          1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
-          exp(-(drop(outer(x.mu, w1.x2, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
+                          1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
+                          exp(-(drop(outer(x.mu, w1.x2, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
 
         # var
         predsig2 <- c(rep(0, nrow(x)))
         for (i in 1:nrow(x)) { # each test point
           mat <- drop(exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X2) / sqrt(theta[-(d + 1)])))) %o%
-            exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X2) / sqrt(theta[-(d + 1)]))))) * # common components
+                        exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X2) / sqrt(theta[-(d + 1)]))))) * # common components
             1 / sqrt(1 + 4 * sig2[i] / theta[d + 1]) *
             exp(-(outer(w1.x2, w1.x2, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w1.x2, w1.x2, FUN = "-"))^2 / (2 * theta[d + 1]))
@@ -237,14 +237,14 @@ predict.RNAmf <- function(object, x, ...) {
 
         # mean
         predy <- (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
-          1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
-          exp(-(drop(outer(x.mu, w1.x2, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
+                    1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
+                    exp(-(drop(outer(x.mu, w1.x2, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
 
         # var
         predsig2 <- c(rep(0, nrow(x)))
         for (i in 1:nrow(x)) { # each test point
           mat <- drop(exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X2) / sqrt(theta[-(d + 1)])))) %o%
-            exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X2) / sqrt(theta[-(d + 1)]))))) * # common components
+                        exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X2) / sqrt(theta[-(d + 1)]))))) * # common components
             1 / sqrt(1 + 4 * sig2[i] / theta[d + 1]) *
             exp(-(outer(w1.x2, w1.x2, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w1.x2, w1.x2, FUN = "-"))^2 / (2 * theta[d + 1]))
@@ -291,12 +291,12 @@ predict.RNAmf <- function(object, x, ...) {
           e2 <- cbind(matrix(1 + sqrt(3) * w1.x2 / theta[d + 1]), sqrt(3) / theta[d + 1])
 
           predy[j] <- mu2 + drop(t(t(cor.sep(t(x[j, ]), X2, theta[-(d + 1)], nu = 1.5)) * # common but depends on kernel
-            (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
-                e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
-              exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
-                  e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                                     (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
+                                           e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
+                                        exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
+                                           e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -348,12 +348,12 @@ predict.RNAmf <- function(object, x, ...) {
           e2 <- cbind(matrix(1 + sqrt(3) * w1.x2 / theta[d + 1]), sqrt(3) / theta[d + 1])
 
           predy[j] <- drop(t(t(cor.sep(t(x[j, ]), X2, theta[-(d + 1)], nu = 1.5)) * # common but depends on kernel
-            (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
-                e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
-              exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
-                  e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                               (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
+                                     e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
+                                  exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
+                                     e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -417,12 +417,12 @@ predict.RNAmf <- function(object, x, ...) {
           )
 
           predy[j] <- mu2 + drop(t(t(cor.sep(t(x[j, ]), X2, theta[-(d + 1)], nu = 2.5)) *
-            (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
-                rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
-              exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
-                  rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                                     (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
+                                           rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
+                                        exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
+                                           rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -484,12 +484,12 @@ predict.RNAmf <- function(object, x, ...) {
           )
 
           predy[j] <- drop(t(t(cor.sep(t(x[j, ]), X2, theta[-(d + 1)], nu = 2.5)) *
-            (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
-                rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
-              exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
-                  rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                               (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e1 %*% lambda11 * pnorm((mua - w1.x2) / sqrt(sig2[j])) +
+                                     rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mua)^2 / (2 * sig2[j]))) +
+                                  exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w1.x2 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e2 %*% lambda21 * pnorm((-mub + w1.x2) / sqrt(sig2[j])) +
+                                     rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w1.x2 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -542,14 +542,14 @@ predict.RNAmf <- function(object, x, ...) {
 
         # mean
         predy <- mu3 + (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
-          1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
-          exp(-(drop(outer(x.mu, w2.x3, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
+                          1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
+                          exp(-(drop(outer(x.mu, w2.x3, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
 
         # var
         predsig2 <- c(rep(0, nrow(x)))
         for (i in 1:nrow(x)) { # each test point
           mat <- drop(exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X3) / sqrt(theta[-(d + 1)])))) %o%
-            exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X3) / sqrt(theta[-(d + 1)]))))) * # common components
+                        exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X3) / sqrt(theta[-(d + 1)]))))) * # common components
             1 / sqrt(1 + 4 * sig2[i] / theta[d + 1]) *
             exp(-(outer(w2.x3, w2.x3, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w2.x3, w2.x3, FUN = "-"))^2 / (2 * theta[d + 1]))
@@ -582,14 +582,14 @@ predict.RNAmf <- function(object, x, ...) {
 
         # mean
         predy <- (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
-          1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
-          exp(-(drop(outer(x.mu, w2.x3, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
+                    1 / sqrt(1 + 2 * sig2 / theta[d + 1]) *
+                    exp(-(drop(outer(x.mu, w2.x3, FUN = "-")))^2 / (theta[d + 1] + 2 * sig2))) %*% a
 
         # var
         predsig2 <- c(rep(0, nrow(x)))
         for (i in 1:nrow(x)) { # each test point
           mat <- drop(exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X3) / sqrt(theta[-(d + 1)])))) %o%
-            exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X3) / sqrt(theta[-(d + 1)]))))) * # common components
+                        exp(-distance(t(x[i, ]) / sqrt(theta[-(d + 1)]), t(t(X3) / sqrt(theta[-(d + 1)]))))) * # common components
             1 / sqrt(1 + 4 * sig2[i] / theta[d + 1]) *
             exp(-(outer(w2.x3, w2.x3, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w2.x3, w2.x3, FUN = "-"))^2 / (2 * theta[d + 1]))
@@ -636,12 +636,12 @@ predict.RNAmf <- function(object, x, ...) {
           e2 <- cbind(matrix(1 + sqrt(3) * w2.x3 / theta[d + 1]), sqrt(3) / theta[d + 1])
 
           predy[j] <- mu3 + drop(t(t(cor.sep(t(x[j, ]), X3, theta[-(d + 1)], nu = 1.5)) * # common but depends on kernel
-            (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
-                e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
-              exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
-                  e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                                     (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
+                                           e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
+                                        exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
+                                           e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
 
@@ -694,12 +694,12 @@ predict.RNAmf <- function(object, x, ...) {
           e2 <- cbind(matrix(1 + sqrt(3) * w2.x3 / theta[d + 1]), sqrt(3) / theta[d + 1])
 
           predy[j] <- drop(t(t(cor.sep(t(x[j, ]), X3, theta[-(d + 1)], nu = 1.5)) * # common but depends on kernel
-            (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
-                e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
-              exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
-                  e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                               (exp((3 * sig2[j] + 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
+                                     e1 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
+                                  exp((3 * sig2[j] - 2 * sqrt(3) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
+                                     e2 %*% lambda12 * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -763,12 +763,12 @@ predict.RNAmf <- function(object, x, ...) {
           )
 
           predy[j] <- mu3 + drop(t(t(cor.sep(t(x[j, ]), X3, theta[-(d + 1)], nu = 2.5)) *
-            (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
-                rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
-              exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
-                  rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                                     (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
+                                           rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
+                                        exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                        (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
+                                           rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -829,12 +829,12 @@ predict.RNAmf <- function(object, x, ...) {
           )
 
           predy[j] <- drop(t(t(cor.sep(t(x[j, ]), X3, theta[-(d + 1)], nu = 2.5)) *
-            (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-              (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
-                rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
-              exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
-                (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
-                  rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
+                               (exp((5 * sig2[j] + 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e1 %*% lambda11 * pnorm((mua - w2.x3) / sqrt(sig2[j])) +
+                                     rowSums(e1 * lambda12) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mua)^2 / (2 * sig2[j]))) +
+                                  exp((5 * sig2[j] - 2 * sqrt(5) * theta[d + 1] * (w2.x3 - x.mu[j])) / (2 * theta[d + 1]^2)) *
+                                  (e2 %*% lambda21 * pnorm((-mub + w2.x3) / sqrt(sig2[j])) +
+                                     rowSums(e2 * lambda22) * sqrt(sig2[j]) / sqrt(2 * pi) * exp(-(w2.x3 - mub)^2 / (2 * sig2[j]))))) %*% a)
         }
 
         # var
@@ -855,5 +855,5 @@ predict.RNAmf <- function(object, x, ...) {
     stop("level is missing")
   }
 
-  return(list(mu = predy, sig2 = predsig2, time = proc.time()[3] - t1))
+  return(list(mu = predy, sig2 = predsig2, time = (proc.time() - t1)[3]))
 }
