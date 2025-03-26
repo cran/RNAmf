@@ -34,10 +34,10 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
       Ci <- fit2$Ki
       a <- Ci %*% (y2 - mu2)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       predy <- mu2 + (exp(-distance(t(t(newx) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
@@ -68,12 +68,13 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
       tau2hat <- fit2$tau2hat
 
       Ci <- fit2$Ki
-      a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      a <- Ci %*% y2
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       predy <- (exp(-distance(t(t(newx) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
@@ -109,10 +110,10 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
       Ci <- fit2$Ki
       a <- Ci %*% (y2 - mu2)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -157,12 +158,13 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
       tau2hat <- fit2$tau2hat
 
       Ci <- fit2$Ki
-      a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      a <- Ci %*% y2
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -212,10 +214,10 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
       Ci <- fit2$Ki
       a <- Ci %*% (y2 - mu2)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -269,12 +271,13 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
       tau2hat <- fit2$tau2hat
 
       Ci <- fit2$Ki
-      a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      a <- Ci %*% y2
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -355,10 +358,10 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
       Ci <- fit2$Ki
       a <- Ci %*% (y2 - mu2)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       predy <- mu2 + (exp(-distance(t(t(newx) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
@@ -389,12 +392,13 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
       tau2hat <- fit2$tau2hat
 
       Ci <- fit2$Ki
-      a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      a <- Ci %*% y2
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       predy <- (exp(-distance(t(t(newx) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
@@ -430,10 +434,10 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
       Ci <- fit2$Ki
       a <- Ci %*% (y2 - mu2)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -478,12 +482,13 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
       tau2hat <- fit2$tau2hat
 
       Ci <- fit2$Ki
-      a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      a <- Ci %*% y2
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -533,10 +538,10 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
       Ci <- fit2$Ki
       a <- Ci %*% (y2 - mu2)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -590,12 +595,13 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
       tau2hat <- fit2$tau2hat
 
       Ci <- fit2$Ki
-      a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+      a <- Ci %*% y2
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -644,7 +650,7 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
 #'
 #' @param Xcand candidate data point to be optimized.
 #' @param fit an object of class RNAmf.
-#' @param mc.sample a number of mc samples generated for this approach. Default is 1000.
+#' @param mc.sample a number of mc samples generated for this approach. Default is 100.
 #' @param parallel logical indicating whether to run parallel or not. Default is FALSE.
 #' @param ncore the number of core for parallel. Default is 1.
 #' @return A negative V1 at Xcand.
@@ -699,10 +705,11 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           Ci <- fit3$Ki
           a <- Ci %*% (y3 - mu3)
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           VEE <- (exp(-distance(t(t(newx1) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -718,12 +725,14 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           tau2hat <- fit3$tau2hat
 
           Ci <- fit3$Ki
-          a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          a <- Ci %*% y3
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           VEE <- (exp(-distance(t(t(newx1) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -744,10 +753,11 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           Ci <- fit3$Ki
           a <- Ci %*% (y3 - mu3)
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -777,12 +787,14 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           tau2hat <- fit3$tau2hat
 
           Ci <- fit3$Ki
-          a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          a <- Ci %*% y3
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -817,10 +829,11 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           Ci <- fit3$Ki
           a <- Ci %*% (y3 - mu3)
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -859,12 +872,14 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           tau2hat <- fit3$tau2hat
 
           Ci <- fit3$Ki
-          a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          a <- Ci %*% y3
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -924,10 +939,11 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           Ci <- fit3$Ki
           a <- Ci %*% (y3 - mu3)
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           VEE <- (exp(-distance(t(t(newx1) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -943,12 +959,14 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           tau2hat <- fit3$tau2hat
 
           Ci <- fit3$Ki
-          a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          a <- Ci %*% y3
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           VEE <- (exp(-distance(t(t(newx1) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -969,10 +987,11 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           Ci <- fit3$Ki
           a <- Ci %*% (y3 - mu3)
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -1002,12 +1021,14 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           tau2hat <- fit3$tau2hat
 
           Ci <- fit3$Ki
-          a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          a <- Ci %*% y3
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -1042,10 +1063,11 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           Ci <- fit3$Ki
           a <- Ci %*% (y3 - mu3)
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -1084,12 +1106,14 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
           tau2hat <- fit3$tau2hat
 
           Ci <- fit3$Ki
-          a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+          a <- Ci %*% y3
 
-          ### scale new inputs ###
-          newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-          x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-          sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+          # ### scale new inputs ###
+          # newx1 <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+          newx1 <- newx
+          # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+          # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
           # mean
           mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -1131,7 +1155,7 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
 #'
 #' @param Xcand candidate data point to be optimized.
 #' @param fit an object of class RNAmf.
-#' @param mc.sample a number of mc samples generated for this approach. Default is 1000.
+#' @param mc.sample a number of mc samples generated for this approach. Default is 100.
 #' @param parallel logical indicating whether to run parallel or not. Default is FALSE.
 #' @param ncore the number of core for parallel. Default is 1.
 #' @return A negative V2 at Xcand.
@@ -1188,10 +1212,10 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
       Ci <- fit3$Ki
       a <- Ci %*% (y3 - mu3)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
       # mean
       predy <- mu3 + (exp(-distance(t(t(newx) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -1223,12 +1247,13 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
       tau2hat <- fit3$tau2hat
 
       Ci <- fit3$Ki
-      a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+      # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+      a <- Ci %*% y3
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
       # mean
       predy <- (exp(-distance(t(t(newx) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -1264,10 +1289,10 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
       Ci <- fit3$Ki
       a <- Ci %*% (y3 - mu3)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -1312,12 +1337,13 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
       tau2hat <- fit3$tau2hat
 
       Ci <- fit3$Ki
-      a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+      # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+      a <- Ci %*% y3
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(3) * sig2 / theta[d + 1]
@@ -1367,10 +1393,10 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
       Ci <- fit3$Ki
       a <- Ci %*% (y3 - mu3)
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -1424,12 +1450,13 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
       tau2hat <- fit3$tau2hat
 
       Ci <- fit3$Ki
-      a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+      # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+      a <- Ci %*% y3
 
-      ### scale new inputs ###
-      newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-      x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-      sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+      # ### scale new inputs ###
+      # newx <- scale_inputs(newx, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+      # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+      # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
       # mean
       mua <- x.mu - sqrt(5) * sig2 / theta[d + 1]
@@ -1486,8 +1513,8 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
 #'
 #' @param Xcand vector or matrix of candidate set which could be added into the current design only used when \code{optim=FALSE}. \code{Xcand} is the set of the points where ALD criterion is evaluated. If \code{Xcand=NULL}, \eqn{100 \times d} number of points from 0 to 1 are generated by Latin hypercube design. Default is \code{NULL}.
 #' @param fit object of class \code{RNAmf}.
-#' @param mc.sample a number of mc samples generated for the MC approximation. Default is \code{1000}.
-#' @param cost vector of the costs for each level of fidelity. If \code{cost=NULL}, total costs at all levels would be 1. \code{cost} is encouraged to have a ascending order of positive value. Default is \code{NULL}.
+#' @param mc.sample a number of mc samples generated for the MC approximation in 3 levels case. Default is \code{100}.
+#' @param cost vector of the costs for each level of fidelity. If \code{cost=NULL}, total costs at all levels would be 1. \code{cost} is encouraged to have an ascending order of positive value. Default is \code{NULL}.
 #' @param optim logical indicating whether to optimize AL criterion by \code{optim}'s gradient-based \code{L-BFGS-B} method. If \code{optim=TRUE}, \eqn{5 \times d} starting points are generated by Latin hypercube design for optimization. If \code{optim=FALSE}, AL criterion is optimized on the \code{Xcand}. Default is \code{TRUE}.
 #' @param parallel logical indicating whether to compute the AL criterion in parallel or not. If \code{parallel=TRUE}, parallel computation is utilized. Default is \code{FALSE}.
 #' @param ncore a number of core for parallel. It is only used if \code{parallel=TRUE}. Default is 1.
@@ -1506,7 +1533,7 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
 #' @importFrom foreach %dopar%
 #' @importFrom doParallel registerDoParallel
 #' @importFrom doParallel stopImplicitCluster
-#' @usage ALD_RNAmf(Xcand = NULL, fit, mc.sample = 1000, cost = NULL,
+#' @usage ALD_RNAmf(Xcand = NULL, fit, mc.sample = 100, cost = NULL,
 #' optim = TRUE, parallel = FALSE, ncore = 1, trace=TRUE)
 #' @export
 #' @examples
@@ -1593,7 +1620,7 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
 #' )
 #' par(oldpar)}
 #'
-ALD_RNAmf <- function(Xcand = NULL, fit, mc.sample = 1000, cost = NULL, optim = TRUE, parallel = FALSE, ncore = 1, trace=TRUE) {
+ALD_RNAmf <- function(Xcand = NULL, fit, mc.sample = 100, cost = NULL, optim = TRUE, parallel = FALSE, ncore = 1, trace=TRUE) {
   t0 <- proc.time()
   ### check the object ###
   if (!inherits(fit, "RNAmf")) {

@@ -162,13 +162,13 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
     kernel <- fit$kernel
     g <- fit1$g
 
-    x.center1 <- attr(fit1$X, "scaled:center")
-    x.scale1 <- attr(fit1$X, "scaled:scale")
-    y.center1 <- attr(fit1$y, "scaled:center")
-
-    x.center2 <- attr(fit2$X, "scaled:center")
-    x.scale2 <- attr(fit2$X, "scaled:scale")
-    y.center2 <- attr(fit2$y, "scaled:center")
+    # x.center1 <- attr(fit1$X, "scaled:center")
+    # x.scale1 <- attr(fit1$X, "scaled:scale")
+    # y.center1 <- attr(fit1$y, "scaled:center")
+    #
+    # x.center2 <- attr(fit2$X, "scaled:center")
+    # x.scale2 <- attr(fit2$X, "scaled:scale")
+    # y.center2 <- attr(fit2$y, "scaled:center")
 
 
     ### Generate the candidate set ###
@@ -194,19 +194,19 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
           return(c(-optim.ALM$value, optim.ALM$par))
         }
       } else {
-        alm.mat <- c(rep(0, nrow(Xcand)))
+        alm.mat <- matrix(c(rep(0, nrow(Xcand))), ncol=1)
         x.mat <- matrix(0, ncol=ncol(Xcand), nrow=nrow(Xcand))
         for (i in 1:nrow(Xcand)) {
           print(paste(i, nrow(Xcand), sep = "/"))
           newx <- matrix(Xcand[i, ], nrow = 1)
-          optim.ALM <- optim(newx, obj.ALM_level_2, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit)
+          optim.ALM <- optim(newx, obj.ALM_level_3, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit)
 
-          alm.mat[i] <- -optim.ALM$value
+          alm.mat[i,] <- -optim.ALM$value
           x.mat[i,] <- optim.ALM$par
         }
-        optm.mat <- rbind(alm.mat, x.mat)
+        optm.mat <- cbind(alm.mat, x.mat)
       }
-      Xnext <- matrix(optm.mat[2:(ncol(fit1$X)+1), which.max(optm.mat[1, ])], nrow = 1)
+      Xnext <- matrix(optm.mat[which.max(optm.mat[,1]), 2:(ncol(fit1$X)+1)], nrow = 1)
       x.cand <- Xnext ### Anyway it will return NULL
       # Xnext <- matrix(optm.mat[ncol(fit1$X) + 1, which.max(optm.mat[(1:ncol(fit1$X)), ])], nrow = 1)
       # x.cand <- matrix(optm.mat[ncol(fit1$X) + 1, ], ncol = ncol(fit1$X))
@@ -244,26 +244,31 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
 
 
     ### Compute the deduced variance at all candidate points ###
-    if (parallel) {
-      pseudointvar <- foreach(i = 1:nrow(x.cand), .combine = cbind) %dopar% {
-        newx <- matrix(x.cand[i, ], nrow = 1)
-
-        return(c(
-          obj.ALC_level_1(newx, Xref, fit, mc.sample),
-          obj.ALC_level_2(newx, Xref, fit, mc.sample)
-        ))
-      }
-      intvar1 <- as.matrix(pseudointvar)[1, ]
-      intvar2 <- as.matrix(pseudointvar)[2, ]
+    if (optim) {
+      intvar1 <- NULL
+      intvar2 <- NULL
     } else {
-      intvar1 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
-      intvar2 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
-      for (i in 1:nrow(x.cand)) {
-        print(paste(i, nrow(x.cand), sep = "/"))
-        newx <- matrix(x.cand[i, ], nrow = 1)
+      if (parallel) {
+        pseudointvar <- foreach(i = 1:nrow(x.cand), .combine = cbind) %dopar% {
+          newx <- matrix(x.cand[i, ], nrow = 1)
 
-        intvar1[i] <- obj.ALC_level_1(newx, Xref, fit, mc.sample)
-        intvar2[i] <- obj.ALC_level_2(newx, Xref, fit, mc.sample)
+          return(c(
+            obj.ALC_level_1(newx, Xref, fit, mc.sample),
+            obj.ALC_level_2(newx, Xref, fit, mc.sample)
+          ))
+        }
+        intvar1 <- as.matrix(pseudointvar)[1, ]
+        intvar2 <- as.matrix(pseudointvar)[2, ]
+      } else {
+        intvar1 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
+        intvar2 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
+        for (i in 1:nrow(x.cand)) {
+          print(paste(i, nrow(x.cand), sep = "/"))
+          newx <- matrix(x.cand[i, ], nrow = 1)
+
+          intvar1[i] <- obj.ALC_level_1(newx, Xref, fit, mc.sample)
+          intvar2[i] <- obj.ALC_level_2(newx, Xref, fit, mc.sample)
+        }
       }
     }
     t5 <-proc.time()
@@ -303,17 +308,17 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
     kernel <- fit$kernel
     g <- fit1$g
 
-    x.center1 <- attr(fit1$X, "scaled:center")
-    x.scale1 <- attr(fit1$X, "scaled:scale")
-    y.center1 <- attr(fit1$y, "scaled:center")
-
-    x.center2 <- attr(fit2$X, "scaled:center")
-    x.scale2 <- attr(fit2$X, "scaled:scale")
-    y.center2 <- attr(fit2$y, "scaled:center")
-
-    x.center3 <- attr(fit3$X, "scaled:center")
-    x.scale3 <- attr(fit3$X, "scaled:scale")
-    y.center3 <- attr(fit3$y, "scaled:center")
+    # x.center1 <- attr(fit1$X, "scaled:center")
+    # x.scale1 <- attr(fit1$X, "scaled:scale")
+    # y.center1 <- attr(fit1$y, "scaled:center")
+    #
+    # x.center2 <- attr(fit2$X, "scaled:center")
+    # x.scale2 <- attr(fit2$X, "scaled:scale")
+    # y.center2 <- attr(fit2$y, "scaled:center")
+    #
+    # x.center3 <- attr(fit3$X, "scaled:center")
+    # x.scale3 <- attr(fit3$X, "scaled:scale")
+    # y.center3 <- attr(fit3$y, "scaled:center")
 
 
     ### Generate the candidate set ###
@@ -339,19 +344,19 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
           return(c(-optim.ALM$value, optim.ALM$par))
         }
       } else {
-        alm.mat <- c(rep(0, nrow(Xcand)))
+        alm.mat <- matrix(c(rep(0, nrow(Xcand))), ncol=1)
         x.mat <- matrix(0, ncol=ncol(Xcand), nrow=nrow(Xcand))
         for (i in 1:nrow(Xcand)) {
           print(paste(i, nrow(Xcand), sep = "/"))
           newx <- matrix(Xcand[i, ], nrow = 1)
           optim.ALM <- optim(newx, obj.ALM_level_3, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit)
 
-          alm.mat[i] <- -optim.ALM$value
+          alm.mat[i,] <- -optim.ALM$value
           x.mat[i,] <- optim.ALM$par
         }
-        optm.mat <- rbind(alm.mat, x.mat)
+        optm.mat <- cbind(alm.mat, x.mat)
       }
-      Xnext <- matrix(optm.mat[2:(ncol(fit1$X)+1), which.max(optm.mat[1, ])], nrow = 1)
+      Xnext <- matrix(optm.mat[which.max(optm.mat[,1]), 2:(ncol(fit1$X)+1)], nrow = 1)
       x.cand <- Xnext ### Anyway it will return NULL
       # Xnext <- matrix(optm.mat[ncol(fit1$X) + 1, which.max(optm.mat[(1:ncol(fit1$X)), ])], nrow = 1)
       # x.cand <- matrix(optm.mat[ncol(fit1$X) + 1, ], ncol = ncol(fit1$X))
@@ -393,30 +398,36 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
 
 
     ### Compute the deduced variance at all candidate points ###
-    if (parallel) {
-      pseudointvar <- foreach(i = 1:nrow(x.cand), .combine = cbind) %dopar% {
-        newx <- matrix(x.cand[i, ], nrow = 1)
-
-        return(c(
-          obj.ALC_level_3_1(newx, Xref, fit, mc.sample),
-          obj.ALC_level_3_2(newx, Xref, fit, mc.sample),
-          obj.ALC_level_3_3(newx, Xref, fit, mc.sample)
-        ))
-      }
-      intvar1 <- as.matrix(pseudointvar)[1, ]
-      intvar2 <- as.matrix(pseudointvar)[2, ]
-      intvar3 <- as.matrix(pseudointvar)[3, ]
+    if (optim) {
+      intvar1 <- NULL
+      intvar2 <- NULL
+      intvar3 <- NULL
     } else {
-      intvar1 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
-      intvar2 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
-      intvar3 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
-      for (i in 1:nrow(x.cand)) {
-        print(paste(i, nrow(x.cand), sep = "/"))
-        newx <- matrix(x.cand[i, ], nrow = 1)
+      if (parallel) {
+        pseudointvar <- foreach(i = 1:nrow(x.cand), .combine = cbind) %dopar% {
+          newx <- matrix(x.cand[i, ], nrow = 1)
 
-        intvar1[i] <- obj.ALC_level_3_1(newx, Xref, fit, mc.sample)
-        intvar2[i] <- obj.ALC_level_3_2(newx, Xref, fit, mc.sample)
-        intvar3[i] <- obj.ALC_level_3_3(newx, Xref, fit, mc.sample)
+          return(c(
+            obj.ALC_level_3_1(newx, Xref, fit, mc.sample),
+            obj.ALC_level_3_2(newx, Xref, fit, mc.sample),
+            obj.ALC_level_3_3(newx, Xref, fit, mc.sample)
+          ))
+        }
+        intvar1 <- as.matrix(pseudointvar)[1, ]
+        intvar2 <- as.matrix(pseudointvar)[2, ]
+        intvar3 <- as.matrix(pseudointvar)[3, ]
+      } else {
+        intvar1 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
+        intvar2 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
+        intvar3 <- c(rep(0, nrow(x.cand))) # IMSPE candidates
+        for (i in 1:nrow(x.cand)) {
+          print(paste(i, nrow(x.cand), sep = "/"))
+          newx <- matrix(x.cand[i, ], nrow = 1)
+
+          intvar1[i] <- obj.ALC_level_3_1(newx, Xref, fit, mc.sample)
+          intvar2[i] <- obj.ALC_level_3_2(newx, Xref, fit, mc.sample)
+          intvar3[i] <- obj.ALC_level_3_3(newx, Xref, fit, mc.sample)
+        }
       }
     }
     t6 <-proc.time()

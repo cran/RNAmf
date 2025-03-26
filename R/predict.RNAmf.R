@@ -191,10 +191,10 @@ predict.RNAmf <- function(object, x, ...) {
         Ci <- fit2$Ki
         a <- Ci %*% (y2 - mu2)
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- mu2 + (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
@@ -210,7 +210,7 @@ predict.RNAmf <- function(object, x, ...) {
             exp(-(outer(w1.x2, w1.x2, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w1.x2, w1.x2, FUN = "-"))^2 / (2 * theta[d + 1]))
 
-          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu2)^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu2)^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       } else {
         d <- ncol(fit1$X)
@@ -228,12 +228,13 @@ predict.RNAmf <- function(object, x, ...) {
         tau2hat <- fit2$tau2hat
 
         Ci <- fit2$Ki
-        a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+        # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+        a <- Ci %*% y2
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X2) / sqrt(theta[-(d + 1)])))) *
@@ -249,7 +250,7 @@ predict.RNAmf <- function(object, x, ...) {
             exp(-(outer(w1.x2, w1.x2, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w1.x2, w1.x2, FUN = "-"))^2 / (2 * theta[d + 1]))
 
-          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       }
     } else if (kernel == "matern1.5") {
@@ -272,10 +273,10 @@ predict.RNAmf <- function(object, x, ...) {
         Ci <- fit2$Ki
         a <- Ci %*% (y2 - mu2)
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -309,7 +310,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 1.5)) %o% t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 1.5))) * # constant depends on kernel
             outer(w1.x2, w1.x2, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu2)^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu2)^2 +sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       } else {
         d <- ncol(fit1$X)
@@ -327,12 +328,13 @@ predict.RNAmf <- function(object, x, ...) {
         tau2hat <- fit2$tau2hat
 
         Ci <- fit2$Ki
-        a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+        # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+        a <- Ci %*% y2
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -366,7 +368,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 1.5)) %o% t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 1.5))) * # constant depends on kernel
             outer(w1.x2, w1.x2, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       }
     } else if (kernel == "matern2.5") {
@@ -389,10 +391,10 @@ predict.RNAmf <- function(object, x, ...) {
         Ci <- fit2$Ki
         a <- Ci %*% (y2 - mu2)
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -435,7 +437,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 2.5)) %o% t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 2.5))) * # constant depends on kernel
             outer(w1.x2, w1.x2, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu2)^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu2)^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       } else {
         d <- ncol(fit1$X)
@@ -453,12 +455,13 @@ predict.RNAmf <- function(object, x, ...) {
         tau2hat <- fit2$tau2hat
 
         Ci <- fit2$Ki
-        a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+        # a <- Ci %*% (y2 + attr(y2, "scaled:center"))
+        a <- Ci %*% y2
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit2$X, "scaled:center")[1:d], attr(fit2$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit2$X, "scaled:center")[d + 1], attr(fit2$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit2$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -502,7 +505,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 2.5)) %o% t(cor.sep(t(x[i, ]), X2, theta[-(d + 1)], nu = 2.5))) * # constant depends on kernel
             outer(w1.x2, w1.x2, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       }
     }
@@ -535,10 +538,10 @@ predict.RNAmf <- function(object, x, ...) {
         Ci <- fit3$Ki
         a <- Ci %*% (y3 - mu3)
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- mu3 + (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -554,7 +557,7 @@ predict.RNAmf <- function(object, x, ...) {
             exp(-(outer(w2.x3, w2.x3, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w2.x3, w2.x3, FUN = "-"))^2 / (2 * theta[d + 1]))
 
-          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu3)^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu3)^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       } else {
         pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, x)
@@ -573,12 +576,13 @@ predict.RNAmf <- function(object, x, ...) {
         tau2hat <- fit3$tau2hat
 
         Ci <- fit3$Ki
-        a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+        # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+        a <- Ci %*% y3
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- (exp(-distance(t(t(x) / sqrt(theta[-(d + 1)])), t(t(X3) / sqrt(theta[-(d + 1)])))) *
@@ -594,7 +598,7 @@ predict.RNAmf <- function(object, x, ...) {
             exp(-(outer(w2.x3, w2.x3, FUN = "+") / 2 - x.mu[i])^2 / (theta[d + 1] / 2 + 2 * sig2[i])) *
             exp(-(outer(w2.x3, w2.x3, FUN = "-"))^2 / (2 * theta[d + 1]))
 
-          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       }
     } else if (kernel == "matern1.5") {
@@ -617,10 +621,10 @@ predict.RNAmf <- function(object, x, ...) {
         Ci <- fit3$Ki
         a <- Ci %*% (y3 - mu3)
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -655,7 +659,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 1.5)) %o% t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 1.5))) * # constant depends on kernel
             outer(w2.x3, w2.x3, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu3)^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu3)^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       } else {
         d <- ncol(fit1$X)
@@ -673,12 +677,13 @@ predict.RNAmf <- function(object, x, ...) {
         tau2hat <- fit3$tau2hat
 
         Ci <- fit3$Ki
-        a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+        # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+        a <- Ci %*% y3
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -712,7 +717,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 1.5)) %o% t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 1.5))) * # constant depends on kernel
             outer(w2.x3, w2.x3, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       }
     } else if (kernel == "matern2.5") {
@@ -735,10 +740,10 @@ predict.RNAmf <- function(object, x, ...) {
         Ci <- fit3$Ki
         a <- Ci %*% (y3 - mu3)
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -781,7 +786,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 2.5)) %o% t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 2.5))) * # constant depends on kernel
             outer(w2.x3, w2.x3, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu3)^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - (predy[i] - mu3)^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       } else {
         d <- ncol(fit1$X)
@@ -799,12 +804,13 @@ predict.RNAmf <- function(object, x, ...) {
         tau2hat <- fit3$tau2hat
 
         Ci <- fit3$Ki
-        a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+        # a <- Ci %*% (y3 + attr(y3, "scaled:center"))
+        a <- Ci %*% y3
 
-        ### scale new inputs ###
-        x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
-        x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
-        sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
+        # ### scale new inputs ###
+        # x <- scale_inputs(x, attr(fit3$X, "scaled:center")[1:d], attr(fit3$X, "scaled:scale")[1:d])
+        # x.mu <- scale_inputs(x.mu, attr(fit3$X, "scaled:center")[d + 1], attr(fit3$X, "scaled:scale")[d + 1])
+        # sig2 <- sig2 / attr(fit3$X, "scaled:scale")[d + 1]^2
 
         # mean
         predy <- c(rep(0, nrow(x)))
@@ -847,7 +853,7 @@ predict.RNAmf <- function(object, x, ...) {
           mat <- drop(t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 2.5)) %o% t(cor.sep(t(x[i, ]), X3, theta[-(d + 1)], nu = 2.5))) * # constant depends on kernel
             outer(w2.x3, w2.x3, FUN = Vectorize(zeta))
 
-          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + drop(t(a) %*% mat %*% a) - tau2hat * sum(diag(Ci %*% mat)))
+          predsig2[i] <- pmax(0, tau2hat - predy[i]^2 + sum((drop(a %o% a) - (Ci * tau2hat)) * mat))
         }
       }
     }

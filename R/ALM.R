@@ -193,13 +193,13 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
     kernel <- fit$kernel
     g <- fit1$g
 
-    x.center1 <- attr(fit1$X, "scaled:center")
-    x.scale1 <- attr(fit1$X, "scaled:scale")
-    y.center1 <- attr(fit1$y, "scaled:center")
-
-    x.center2 <- attr(fit2$X, "scaled:center")
-    x.scale2 <- attr(fit2$X, "scaled:scale")
-    y.center2 <- attr(fit2$y, "scaled:center")
+    # x.center1 <- attr(fit1$X, "scaled:center")
+    # x.scale1 <- attr(fit1$X, "scaled:scale")
+    # y.center1 <- attr(fit1$y, "scaled:center")
+    #
+    # x.center2 <- attr(fit2$X, "scaled:center")
+    # x.scale2 <- attr(fit2$X, "scaled:scale")
+    # y.center2 <- attr(fit2$y, "scaled:center")
 
 
     ### Generate the candidate set ###
@@ -295,17 +295,17 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
     kernel <- fit$kernel
     g <- fit1$g
 
-    x.center1 <- attr(fit1$X, "scaled:center")
-    x.scale1 <- attr(fit1$X, "scaled:scale")
-    y.center1 <- attr(fit1$y, "scaled:center")
-
-    x.center2 <- attr(fit2$X, "scaled:center")
-    x.scale2 <- attr(fit2$X, "scaled:scale")
-    y.center2 <- attr(fit2$y, "scaled:center")
-
-    x.center3 <- attr(fit3$X, "scaled:center")
-    x.scale3 <- attr(fit3$X, "scaled:scale")
-    y.center3 <- attr(fit3$y, "scaled:center")
+    # x.center1 <- attr(fit1$X, "scaled:center")
+    # x.scale1 <- attr(fit1$X, "scaled:scale")
+    # y.center1 <- attr(fit1$y, "scaled:center")
+    #
+    # x.center2 <- attr(fit2$X, "scaled:center")
+    # x.scale2 <- attr(fit2$X, "scaled:scale")
+    # y.center2 <- attr(fit2$y, "scaled:center")
+    #
+    # x.center3 <- attr(fit3$X, "scaled:center")
+    # x.scale3 <- attr(fit3$X, "scaled:scale")
+    # y.center3 <- attr(fit3$y, "scaled:center")
 
 
     ### Generate the candidate set ###

@@ -63,15 +63,22 @@ cor.sep <- function(X, x = NULL, theta, nu, derivative = 0) {
 
 #' fitting the model with matern kernel.
 #'
+#' @details The choice of bounds for the optimization follows the approach used in \pkg{hetGP}.
+#' For more details, see the reference below.
+#'
+#' @references
+#' M. Binois and R. B. Gramacy (2021). hetGP: Heteroskedastic Gaussian Process Modeling and Sequential Design in R.
+#' \emph{Journal of Statistical Software}, 98(13), 1-44;
+#' \doi{doi: 10.18637/jss.v098.i13}
+#'
 #' @param X vector or matrix of input locations.
 #' @param y vector of response values.
 #' @param g nugget parameter. Default is 1.490116e-08.
 #' @param nu numerical value of smoothness hyperparameter. It should be 0.5, 1.5, 2.5, 3.5, or 4.5.
-#' @param lower lower bound of theta.
-#' @param upper upper bound of theta.
-#' @param Xscale logical indicating whether to scale X or not. Default is TRUE.
-#' @param Yscale logical indicating whether to scale y or not. Only used if constant=FALSE. Default is TRUE.
 #' @param constant logical indicating for constant mean (constant=TRUE) or zero mean (constant=FALSE). Default is FALSE.
+#' @param p quantile on distances. Default is 0.01
+#' @param min_cor minimal correlation between two design points at the defined quantile distance. Default is 0.01.
+#' @param max_cor maximal correlation between two design points at the defined (1-p) quantile distance. Default is 0.5.
 #'
 #' @return A list containing hyperparameters, covariance inverse matrix, X, y and logical inputs:
 #' \itemize{
@@ -88,7 +95,8 @@ cor.sep <- function(X, x = NULL, theta, nu, derivative = 0) {
 #'   \item \code{constant}: copy of constant.
 #' }
 #'
-#' @importFrom stats optim quantile
+#' @importFrom stats optim quantile uniroot
+#' @importFrom methods is
 #' @noRd
 #' @keywords internal
 #' @examples
@@ -107,39 +115,29 @@ cor.sep <- function(X, x = NULL, theta, nu, derivative = 0) {
 #'
 #' matGP(X1, y1, nu = 2.5)
 #' }
-matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
-                  lower = rep(0.1, ncol(X)), upper = rep(100, ncol(X)),
-                  Xscale = TRUE, Yscale = TRUE, constant = FALSE) {
+matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps), constant = FALSE, p=0.01, min_cor = 0.01, max_cor = 0.5) {
   if (constant) {
     if (is.null(dim(X))) X <- matrix(X, ncol = 1)
-
-    parbound <- function(XX) {
-      XX <- matrix(XX, ncol = 1)
-
-      lower <- -quantile(distance(XX)[lower.tri(distance(XX))], 0.05) / log(0.01) * (apply(XX, 2, range)[2, ] - apply(XX, 2, range)[1, ])^2
-      upper <- -quantile(distance(XX)[lower.tri(distance(XX))], 0.95) / log(0.5) * (apply(XX, 2, range)[2, ] - apply(XX, 2, range)[1, ])^2
-
-      return(c(lower, upper))
+    # hetGP way
+    Xscaled <- (X - matrix(apply(X, 2, range)[1,], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*%
+      diag(1/(apply(X, 2, range)[2,] - apply(X, 2, range)[1,]), ncol(X))
+    tmpfun <- function(theta, repr_dist, value){
+      cor.sep(matrix(sqrt(repr_dist/ncol(X)), ncol = ncol(X)), matrix(0, ncol = ncol(X)), theta = rep(theta,ncol(X)), nu = nu) - value
     }
-
-    # hetGP way * 10^(d*3/4)
-    XX <- (X - matrix(apply(X, 2, range)[1, ], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1 / (apply(X, 2, range)[2, ] - apply(X, 2, range)[1, ]), ncol(X))
-    lower <- pmax(10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[1, ], 0.2)
-    upper <- 10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[2, ]
+    theta_min <- try(uniroot(tmpfun, interval = c(g, 100), value = min_cor,
+                             repr_dist = quantile(distance(Xscaled)[lower.tri(distance(Xscaled))], p), tol = g)$root)
+    if(is(theta_min, "try-error")){
+      warning("The automatic selection of lengthscales bounds was not successful. Perhaps provide lower and upper values.")
+      theta_min <- 1e-2
+    }
+    theta_max <- try(uniroot(tmpfun, interval = c(g, 100), value = max_cor,
+                             repr_dist = quantile(distance(Xscaled)[lower.tri(distance(Xscaled))], 1-p), tol = g)$root, silent = TRUE)
+    if(is(theta_max, "try-error")){
+      theta_max <- 5
+    }
+    lower <- theta_min * (apply(X, 2, range)[2,] - apply(X, 2, range)[1,])
+    upper <- max(1, theta_max) * (apply(X, 2, range)[2,] - apply(X, 2, range)[1,])
     init <- sqrt(lower * upper)
-
-    # # hetGP way
-    # XX <- (X - matrix(apply(X, 2, range)[1,], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1/(apply(X, 2, range)[2,] - apply(X, 2, range)[1,]), ncol(X))
-    # lower <- - quantile(distance(XX)[lower.tri(distance(XX))], 0.05)/log(0.01) * (apply(XX, 2, range)[2,] - apply(XX, 2, range)[1,])^2
-    # upper <- - quantile(distance(XX)[lower.tri(distance(XX))], 0.95)/log(0.5) * (apply(XX, 2, range)[2,] - apply(XX, 2, range)[1,])^2
-    # init <- sqrt(lower*upper)
-
-    if (Xscale) {
-      X <- scale_inputs(X)
-    } else {
-      attr(X, "scaled:center") <- rep(0, ncol(X))
-      attr(X, "scaled:scale") <- rep(1, ncol(X))
-    }
 
     n <- length(y)
 
@@ -157,76 +155,65 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
       return(-ll)
     }
 
-    # gradnlsep <- function(par, X, Y)
-    # {
-    #   theta <- par
-    #   n <- length(Y)
-    #   K <- cor.sep(X, theta=theta, nu=nu)
-    #   Ki <- solve(K+diag(g,n))
-    #   KiY <- Ki %*% Y
-    #
-    #   ## loop over theta components
-    #   dlltheta <- rep(NA, length(theta))
-    #   # dK <- matern.kernel(R, nu=nu, derivative = 1)
-    #   dK <- cor.sep(X, theta=theta, nu=nu, derivative = 1)
-    #   for(j in 1:length(dlltheta)) {
-    #     dotK <- dK * (-distance(X[,j])/(theta[j]^3)/R)
-    #     diag(dotK) <- rep(0, n)
-    #     dlltheta[j] <- (n/2) * t(KiY) %*% dotK %*% KiY / (t(Y) %*% KiY) -
-    #       (1/2)*sum(diag(Ki %*% dotK))
-    #   }
-    #
-    #   return(-c(dlltheta))
-    # }
+    gradnlsep <- function(par, X, Y) {
+      theta <- par
+      K <- cor.sep(X, theta = theta, nu = nu)
+      Ki <- solve(K + diag(g, n))
 
-    outg <- optim(init, nlsep, # gradnlsep,
-      method = "L-BFGS-B", lower = lower, upper = upper, X = X, Y = y
-    )
+      one.vec <- matrix(1, ncol = 1, nrow = n)
+      mu.hat <- drop((t(one.vec) %*% Ki %*% Y) / (t(one.vec) %*% Ki %*% one.vec))
+
+      KiY <- Ki %*% (Y - mu.hat)
+      ## loop over theta components
+      dlltheta <- rep(NA, length(theta))
+      for (k in 1:length(dlltheta)) {
+        if(nu==1.5){
+          u_k <- sqrt(distance(X[, k] / theta[k]))
+          dotK <- K * (3 * u_k^2 / theta[k]) / (1 + sqrt(3) * u_k)
+        }else{
+          u_k <- sqrt(distance(X[, k] / theta[k]))
+          dotK <- K * (5/3 * u_k^2 / theta[k]) * (1+sqrt(5)*u_k) / (1 + sqrt(5) * u_k + 5/3*u_k^2)
+        }
+        dlltheta[k] <- (n / 2) * t(KiY) %*% dotK %*% KiY / (t(Y) %*% KiY) - (1 / 2) * sum(diag(Ki %*% dotK))
+      }
+      return(-c(dlltheta))
+    }
+
+    outg <- optim(init, nlsep, gradnlsep, method = "L-BFGS-B", lower = lower, upper = upper, X = X, Y = y)
 
     theta <- outg$par
 
-    # R <- sqrt(distance(t(t(X)/theta)))
-    # K <- matern.kernel(R, nu=nu)
     K <- cor.sep(X, theta = theta, nu = nu)
     Ki <- solve(K + diag(g, n))
     one.vec <- matrix(1, ncol = 1, nrow = n)
     mu.hat <- drop((t(one.vec) %*% Ki %*% y) / (t(one.vec) %*% Ki %*% one.vec))
     tau2hat <- drop(t(y - mu.hat) %*% Ki %*% (y - mu.hat) / nrow(X))
 
-    return(list(theta = theta, nu = nu, g = g, Ki = Ki, mu.hat = mu.hat, X = X, y = y, tau2hat = tau2hat, Xscale = Xscale, constant = constant))
+    return(list(Ki = Ki, X = X, y = y, theta = theta, nu = nu, g = g, mu.hat = mu.hat, tau2hat = tau2hat, constant = constant))
   } else {
     if (is.null(dim(X))) X <- matrix(X, ncol = 1)
-
-    parbound <- function(XX) {
-      XX <- matrix(XX, ncol = 1)
-
-      lower <- -quantile(distance(XX)[lower.tri(distance(XX))], 0.05) / log(0.01) * (apply(XX, 2, range)[2, ] - apply(XX, 2, range)[1, ])^2
-      upper <- -quantile(distance(XX)[lower.tri(distance(XX))], 0.95) / log(0.5) * (apply(XX, 2, range)[2, ] - apply(XX, 2, range)[1, ])^2
-
-      return(c(lower, upper))
+    # hetGP way
+    Xscaled <- (X - matrix(apply(X, 2, range)[1,], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*%
+      diag(1/(apply(X, 2, range)[2,] - apply(X, 2, range)[1,]), ncol(X))
+    tmpfun <- function(theta, repr_dist, value){
+      cor.sep(matrix(sqrt(repr_dist/ncol(X)), ncol = ncol(X)), matrix(0, ncol = ncol(X)), theta = rep(theta,ncol(X)), nu = nu) - value
     }
-
-    # hetGP way * 10^(d*3/4)
-    XX <- (X - matrix(apply(X, 2, range)[1, ], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1 / (apply(X, 2, range)[2, ] - apply(X, 2, range)[1, ]), ncol(X))
-    lower <- pmax(10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[1, ], 0.2)
-    upper <- 10^(ncol(XX) * 3 / 4) * apply(XX, 2, parbound)[2, ]
+    theta_min <- try(uniroot(tmpfun, interval = c(g, 100), value = min_cor,
+                             repr_dist = quantile(distance(Xscaled)[lower.tri(distance(Xscaled))], p), tol = g)$root)
+    if(is(theta_min, "try-error")){
+      warning("The automatic selection of lengthscales bounds was not successful. Perhaps provide lower and upper values.")
+      theta_min <- 1e-2
+    }
+    theta_max <- try(uniroot(tmpfun, interval = c(g, 100), value = max_cor,
+                             repr_dist = quantile(distance(Xscaled)[lower.tri(distance(Xscaled))], 1-p), tol = g)$root, silent = TRUE)
+    if(is(theta_max, "try-error")){
+      theta_max <- 5
+    }
+    lower <- theta_min * (apply(X, 2, range)[2,] - apply(X, 2, range)[1,])
+    upper <- max(1, theta_max) * (apply(X, 2, range)[2,] - apply(X, 2, range)[1,])
     init <- sqrt(lower * upper)
 
-    # # hetGP way
-    # XX <- (X - matrix(apply(X, 2, range)[1,], nrow = nrow(X), ncol = ncol(X), byrow = TRUE)) %*% diag(1/(apply(X, 2, range)[2,] - apply(X, 2, range)[1,]), ncol(X))
-    # lower <- - quantile(distance(XX)[lower.tri(distance(XX))], 0.05)/log(0.01) * (apply(XX, 2, range)[2,] - apply(XX, 2, range)[1,])^2
-    # upper <- - quantile(distance(XX)[lower.tri(distance(XX))], 0.95)/log(0.5) * (apply(XX, 2, range)[2,] - apply(XX, 2, range)[1,])^2
-    # init <- sqrt(lower*upper)
-
-    if (Xscale) {
-      X <- scale_inputs(X)
-    } else {
-      attr(X, "scaled:center") <- rep(0, ncol(X))
-      attr(X, "scaled:scale") <- rep(1, ncol(X))
-    }
-
     n <- length(y)
-    if (Yscale) y <- scale(y, center = TRUE, scale = FALSE) # If use mean, don't scale
 
     nlsep <- function(par, X, Y) {
       theta <- par # lengthscale
@@ -238,14 +225,37 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
       return(drop(-ll))
     }
 
-    outg <- optim(init, nlsep, method = "L-BFGS-B", lower = lower, upper = upper, X = X, Y = y)
+    gradnlsep <- function(par, X, Y) {
+      theta <- par
+      K <- cor.sep(X, theta = theta, nu = nu)
+      Ki <- solve(K + diag(g, n))
+
+      KiY <- Ki %*% Y
+      ## loop over theta components
+      dlltheta <- rep(NA, length(theta))
+      for (k in 1:length(dlltheta)) {
+        if(nu==1.5){
+          u_k <- sqrt(distance(X[, k] / theta[k]))
+          dotK <- K * (3 * u_k^2 / theta[k]) / (1 + sqrt(3) * u_k)
+        }else{
+          u_k <- sqrt(distance(X[, k] / theta[k]))
+          dotK <- K * (5/3 * u_k^2 / theta[k]) * (1+sqrt(5)*u_k) / (1 + sqrt(5) * u_k + 5/3*u_k^2)
+        }
+        dlltheta[k] <- (n / 2) * t(KiY) %*% dotK %*% KiY / (t(Y) %*% KiY) - (1 / 2) * sum(diag(Ki %*% dotK))
+      }
+      return(-c(dlltheta))
+    }
+
+    outg <- optim(init, nlsep, gradnlsep, method = "L-BFGS-B", lower = lower, upper = upper, X = X, Y = y)
+
+    theta <- outg$par
 
     K <- cor.sep(X, theta = outg$par, nu = nu)
     Ki <- solve(K + diag(g, n))
-    tau2hat <- drop(t(y) %*% Ki %*% (y) / n)
     mu.hat <- 0
+    tau2hat <- drop(t(y) %*% Ki %*% (y) / n)
 
-    return(list(theta = outg$par, nu = nu, g = g, Ki = Ki, mu.hat = mu.hat, X = X, y = y, tau2hat = tau2hat, Xscale = Xscale, Yscale = Yscale, constant = constant))
+    return(list(Ki = Ki, X = X, y = y, theta = theta, nu = nu, g = g, mu.hat = mu.hat, tau2hat = tau2hat, constant = constant))
   }
 }
 
@@ -283,51 +293,22 @@ matGP <- function(X, y, nu = 2.5, g = sqrt(.Machine$double.eps),
 #' pred.matGP(fit1, x)
 #' }
 pred.matGP <- function(fit, xnew) {
-  constant <- fit$constant
+  xnew <- as.matrix(xnew)
 
-  if (constant) {
-    xnew <- as.matrix(xnew)
+  Ki <- fit$Ki
+  theta <- fit$theta
+  nu <- fit$nu
+  g <- fit$g
+  X <- fit$X
+  y <- fit$y
+  tau2hat <- fit$tau2hat
+  mu.hat <- fit$mu.hat
 
-    Xscale <- fit$Xscale
-    Ki <- fit$Ki
-    theta <- fit$theta
-    nu <- fit$nu
-    g <- fit$g
-    X <- fit$X
-    y <- fit$y
-    tau2hat <- fit$tau2hat
-    mu.hat <- fit$mu.hat
+  KXX <- cor.sep(xnew, theta = theta, nu = nu)
+  KX <- t(cor.sep(X, xnew, theta = theta, nu = nu))
 
-    if (Xscale) xnew <- scale_inputs(xnew, attr(X, "scaled:center"), attr(X, "scaled:scale"))
+  mup2 <- mu.hat + KX %*% Ki %*% (y - mu.hat)
+  Sigmap2 <- pmax(0, diag(tau2hat * (KXX + diag(g, nrow(xnew)) - KX %*% Ki %*% t(KX))))
 
-    KXX <- cor.sep(xnew, theta = theta, nu = nu)
-    KX <- t(cor.sep(X, xnew, theta = theta, nu = nu))
-
-    mup2 <- mu.hat + KX %*% Ki %*% (y - mu.hat)
-    Sigmap2 <- pmax(0, diag(tau2hat * (KXX + diag(g, nrow(xnew)) - KX %*% Ki %*% t(KX))))
-
-    return(list(mu = mup2, sig2 = Sigmap2))
-  } else {
-    xnew <- as.matrix(xnew)
-
-    Xscale <- fit$Xscale
-    Yscale <- fit$Yscale
-    Ki <- fit$Ki
-    theta <- fit$theta
-    nu <- fit$nu
-    g <- fit$g
-    X <- fit$X
-    y <- fit$y
-    tau2hat <- fit$tau2hat
-
-    if (Xscale) xnew <- scale_inputs(xnew, attr(X, "scaled:center"), attr(X, "scaled:scale"))
-
-    KXX <- cor.sep(xnew, theta = theta, nu = nu)
-    KX <- t(cor.sep(X, xnew, theta = theta, nu = nu))
-
-    if (Yscale) mup2 <- KX %*% Ki %*% (y + attr(y, "scaled:center")) else mup2 <- KX %*% Ki %*% y
-    Sigmap2 <- pmax(0, diag(tau2hat * (KXX + diag(g, nrow(xnew)) - KX %*% Ki %*% t(KX))))
-
-    return(list(mu = mup2, sig2 = Sigmap2))
-  }
+  return(list(mu = mup2, sig2 = Sigmap2))
 }

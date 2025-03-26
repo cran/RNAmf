@@ -19,13 +19,13 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   kernel <- fit$kernel
   g <- fit1$g
 
-  x.center1 <- attr(fit1$X, "scaled:center")
-  x.scale1 <- attr(fit1$X, "scaled:scale")
-  y.center1 <- attr(fit1$y, "scaled:center")
-
-  x.center2 <- attr(fit2$X, "scaled:center")
-  x.scale2 <- attr(fit2$X, "scaled:scale")
-  y.center2 <- attr(fit2$y, "scaled:center")
+  # x.center1 <- attr(fit1$X, "scaled:center")
+  # x.scale1 <- attr(fit1$X, "scaled:scale")
+  # y.center1 <- attr(fit1$y, "scaled:center")
+  #
+  # x.center2 <- attr(fit2$X, "scaled:center")
+  # x.scale2 <- attr(fit2$X, "scaled:scale")
+  # y.center2 <- attr(fit2$y, "scaled:center")
 
   Xcand <- matrix(Xcand, nrow = 1)
   if (kernel == "sqex") {
@@ -36,7 +36,8 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
 
-  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  # Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- Xcand
 
   ### Choose level 1 ###
   ### update Ki1
@@ -60,8 +61,8 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   )
 
   fit1$X <- rbind(f1$X, Xcand1)
-  attr(fit1$X, "scaled:center") <- x.center1
-  attr(fit1$X, "scaled:scale") <- x.scale1
+  # attr(fit1$X, "scaled:center") <- x.center1
+  # attr(fit1$X, "scaled:scale") <- x.scale1
 
 
   ALC.out <- rep(0, mc.sample)
@@ -71,8 +72,9 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
@@ -86,8 +88,9 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
@@ -121,13 +124,13 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   kernel <- fit$kernel
   g <- fit1$g
 
-  x.center1 <- attr(fit1$X, "scaled:center")
-  x.scale1 <- attr(fit1$X, "scaled:scale")
-  y.center1 <- attr(fit1$y, "scaled:center")
-
-  x.center2 <- attr(fit2$X, "scaled:center")
-  x.scale2 <- attr(fit2$X, "scaled:scale")
-  y.center2 <- attr(fit2$y, "scaled:center")
+  # x.center1 <- attr(fit1$X, "scaled:center")
+  # x.scale1 <- attr(fit1$X, "scaled:scale")
+  # y.center1 <- attr(fit1$y, "scaled:center")
+  #
+  # x.center2 <- attr(fit2$X, "scaled:center")
+  # x.scale2 <- attr(fit2$X, "scaled:scale")
+  # y.center2 <- attr(fit2$y, "scaled:center")
 
   Xcand <- matrix(Xcand, nrow = 1)
   if (kernel == "sqex") {
@@ -137,7 +140,8 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   } else if (kernel == "matern2.5") {
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
-  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  # Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- Xcand
 
   ### Choose level 1 ###
   ### update Ki1
@@ -161,8 +165,8 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
   )
 
   fit1$X <- rbind(f1$X, Xcand1)
-  attr(fit1$X, "scaled:center") <- x.center1
-  attr(fit1$X, "scaled:scale") <- x.scale1
+  # attr(fit1$X, "scaled:center") <- x.center1
+  # attr(fit1$X, "scaled:scale") <- x.scale1
 
   if (parallel) {
     ALC.out <- foreach(i = 1:mc.sample, .combine = c) %dopar% {
@@ -170,8 +174,9 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -191,7 +196,8 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       }
 
       ### update Ki2
-      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      # newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      newx2 <- cbind(Xcand, y1.sample[i])
 
       if (kernel == "sqex") {
         cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
@@ -212,14 +218,15 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       )
 
       fit2$X <- rbind(f2$X, newx2)
-      attr(fit2$X, "scaled:center") <- x.center2
-      attr(fit2$X, "scaled:scale") <- x.scale2
+      # attr(fit2$X, "scaled:center") <- x.center2
+      # attr(fit2$X, "scaled:scale") <- x.scale2
 
       if (constant) {
         fit2$y <- c(f2$y, y2.sample)
       } else {
-        fit2$y <- c(f2$y, y2.sample - y.center2)
-        attr(fit2$y, "scaled:center") <- y.center2
+        # fit2$y <- c(f2$y, y2.sample - y.center2)
+        fit2$y <- c(f2$y, y2.sample)
+        # attr(fit2$y, "scaled:center") <- y.center2
       }
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
@@ -235,8 +242,9 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -256,7 +264,8 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       }
 
       ### update Ki2
-      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      # newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      newx2 <- cbind(Xcand, y1.sample[i])
 
       if (kernel == "sqex") {
         cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
@@ -277,14 +286,15 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       )
 
       fit2$X <- rbind(f2$X, newx2)
-      attr(fit2$X, "scaled:center") <- x.center2
-      attr(fit2$X, "scaled:scale") <- x.scale2
+      # attr(fit2$X, "scaled:center") <- x.center2
+      # attr(fit2$X, "scaled:scale") <- x.scale2
 
       if (constant) {
         fit2$y <- c(f2$y, y2.sample)
       } else {
-        fit2$y <- c(f2$y, y2.sample - y.center2)
-        attr(fit2$y, "scaled:center") <- y.center2
+        # fit2$y <- c(f2$y, y2.sample - y.center2)
+        fit2$y <- c(f2$y, y2.sample)
+        # attr(fit2$y, "scaled:center") <- y.center2
       }
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
@@ -322,17 +332,17 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   kernel <- fit$kernel
   g <- fit1$g
 
-  x.center1 <- attr(fit1$X, "scaled:center")
-  x.scale1 <- attr(fit1$X, "scaled:scale")
-  y.center1 <- attr(fit1$y, "scaled:center")
-
-  x.center2 <- attr(fit2$X, "scaled:center")
-  x.scale2 <- attr(fit2$X, "scaled:scale")
-  y.center2 <- attr(fit2$y, "scaled:center")
-
-  x.center3 <- attr(fit3$X, "scaled:center")
-  x.scale3 <- attr(fit3$X, "scaled:scale")
-  y.center3 <- attr(fit3$y, "scaled:center")
+  # x.center1 <- attr(fit1$X, "scaled:center")
+  # x.scale1 <- attr(fit1$X, "scaled:scale")
+  # y.center1 <- attr(fit1$y, "scaled:center")
+  #
+  # x.center2 <- attr(fit2$X, "scaled:center")
+  # x.scale2 <- attr(fit2$X, "scaled:scale")
+  # y.center2 <- attr(fit2$y, "scaled:center")
+  #
+  # x.center3 <- attr(fit3$X, "scaled:center")
+  # x.scale3 <- attr(fit3$X, "scaled:scale")
+  # y.center3 <- attr(fit3$y, "scaled:center")
 
   Xcand <- matrix(Xcand, nrow = 1)
   if (kernel == "sqex") {
@@ -342,7 +352,8 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   } else if (kernel == "matern2.5") {
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
-  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  # Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- Xcand
 
   ### Choose level 1 ###
   ### update Ki1
@@ -366,8 +377,8 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   )
 
   fit1$X <- rbind(f1$X, Xcand1)
-  attr(fit1$X, "scaled:center") <- x.center1
-  attr(fit1$X, "scaled:scale") <- x.scale1
+  # attr(fit1$X, "scaled:center") <- x.center1
+  # attr(fit1$X, "scaled:scale") <- x.scale1
 
   if (parallel) {
     ALC.out <- foreach(i = 1:mc.sample, .combine = c) %dopar% {
@@ -375,8 +386,9 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -392,8 +404,9 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -431,17 +444,17 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   kernel <- fit$kernel
   g <- fit1$g
 
-  x.center1 <- attr(fit1$X, "scaled:center")
-  x.scale1 <- attr(fit1$X, "scaled:scale")
-  y.center1 <- attr(fit1$y, "scaled:center")
-
-  x.center2 <- attr(fit2$X, "scaled:center")
-  x.scale2 <- attr(fit2$X, "scaled:scale")
-  y.center2 <- attr(fit2$y, "scaled:center")
-
-  x.center3 <- attr(fit3$X, "scaled:center")
-  x.scale3 <- attr(fit3$X, "scaled:scale")
-  y.center3 <- attr(fit3$y, "scaled:center")
+  # x.center1 <- attr(fit1$X, "scaled:center")
+  # x.scale1 <- attr(fit1$X, "scaled:scale")
+  # y.center1 <- attr(fit1$y, "scaled:center")
+  #
+  # x.center2 <- attr(fit2$X, "scaled:center")
+  # x.scale2 <- attr(fit2$X, "scaled:scale")
+  # y.center2 <- attr(fit2$y, "scaled:center")
+  #
+  # x.center3 <- attr(fit3$X, "scaled:center")
+  # x.scale3 <- attr(fit3$X, "scaled:scale")
+  # y.center3 <- attr(fit3$y, "scaled:center")
 
   Xcand <- matrix(Xcand, nrow = 1)
   if (kernel == "sqex") {
@@ -451,7 +464,8 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   } else if (kernel == "matern2.5") {
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
-  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  # Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- Xcand
 
   ### Choose level 1 ###
   ### update Ki1
@@ -475,8 +489,8 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   )
 
   fit1$X <- rbind(f1$X, Xcand1)
-  attr(fit1$X, "scaled:center") <- x.center1
-  attr(fit1$X, "scaled:scale") <- x.scale1
+  # attr(fit1$X, "scaled:center") <- x.center1
+  # attr(fit1$X, "scaled:scale") <- x.scale1
 
   if (parallel) {
     ALC.out <- foreach(i = 1:mc.sample, .combine = c) %dopar% {
@@ -484,8 +498,9 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -505,7 +520,8 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       }
 
       ### update Ki2
-      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      # newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      newx2 <- cbind(Xcand, y1.sample[i])
 
       if (kernel == "sqex") {
         cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
@@ -526,14 +542,15 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       )
 
       fit2$X <- rbind(f2$X, newx2)
-      attr(fit2$X, "scaled:center") <- x.center2
-      attr(fit2$X, "scaled:scale") <- x.scale2
+      # attr(fit2$X, "scaled:center") <- x.center2
+      # attr(fit2$X, "scaled:scale") <- x.scale2
 
       if (constant) {
         fit2$y <- c(f2$y, y2.sample)
       } else {
-        fit2$y <- c(f2$y, y2.sample - y.center2)
-        attr(fit2$y, "scaled:center") <- y.center2
+        # fit2$y <- c(f2$y, y2.sample - y.center2)
+        fit2$y <- c(f2$y, y2.sample)
+        # attr(fit2$y, "scaled:center") <- y.center2
       }
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
@@ -549,8 +566,9 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -570,7 +588,8 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       }
 
       ### update Ki2
-      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      # newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      newx2 <- cbind(Xcand, y1.sample[i])
 
       if (kernel == "sqex") {
         cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
@@ -591,14 +610,15 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       )
 
       fit2$X <- rbind(f2$X, newx2)
-      attr(fit2$X, "scaled:center") <- x.center2
-      attr(fit2$X, "scaled:scale") <- x.scale2
+      # attr(fit2$X, "scaled:center") <- x.center2
+      # attr(fit2$X, "scaled:scale") <- x.scale2
 
       if (constant) {
         fit2$y <- c(f2$y, y2.sample)
       } else {
-        fit2$y <- c(f2$y, y2.sample - y.center2)
-        attr(fit2$y, "scaled:center") <- y.center2
+        # fit2$y <- c(f2$y, y2.sample - y.center2)
+        fit2$y <- c(f2$y, y2.sample)
+        # attr(fit2$y, "scaled:center") <- y.center2
       }
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
@@ -636,17 +656,17 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   kernel <- fit$kernel
   g <- fit1$g
 
-  x.center1 <- attr(fit1$X, "scaled:center")
-  x.scale1 <- attr(fit1$X, "scaled:scale")
-  y.center1 <- attr(fit1$y, "scaled:center")
-
-  x.center2 <- attr(fit2$X, "scaled:center")
-  x.scale2 <- attr(fit2$X, "scaled:scale")
-  y.center2 <- attr(fit2$y, "scaled:center")
-
-  x.center3 <- attr(fit3$X, "scaled:center")
-  x.scale3 <- attr(fit3$X, "scaled:scale")
-  y.center3 <- attr(fit3$y, "scaled:center")
+  # x.center1 <- attr(fit1$X, "scaled:center")
+  # x.scale1 <- attr(fit1$X, "scaled:scale")
+  # y.center1 <- attr(fit1$y, "scaled:center")
+  #
+  # x.center2 <- attr(fit2$X, "scaled:center")
+  # x.scale2 <- attr(fit2$X, "scaled:scale")
+  # y.center2 <- attr(fit2$y, "scaled:center")
+  #
+  # x.center3 <- attr(fit3$X, "scaled:center")
+  # x.scale3 <- attr(fit3$X, "scaled:scale")
+  # y.center3 <- attr(fit3$y, "scaled:center")
 
   Xcand <- matrix(Xcand, nrow = 1)
   if (kernel == "sqex") {
@@ -656,7 +676,8 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   } else if (kernel == "matern2.5") {
     y1.sample <- rnorm(mc.sample, mean = pred.matGP(f1, Xcand)$mu, sd = sqrt(pred.matGP(f1, Xcand)$sig2))
   }
-  Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  # Xcand1 <- scale_inputs(Xcand, x.center1, x.scale1)
+  Xcand1 <- Xcand
 
   ### Choose level 1 ###
   ### update Ki1
@@ -680,8 +701,8 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
   )
 
   fit1$X <- rbind(f1$X, Xcand1)
-  attr(fit1$X, "scaled:center") <- x.center1
-  attr(fit1$X, "scaled:scale") <- x.scale1
+  # attr(fit1$X, "scaled:center") <- x.center1
+  # attr(fit1$X, "scaled:scale") <- x.scale1
 
   if (parallel) {
     ALC.out <- foreach(i = 1:mc.sample, .combine = c) %dopar% {
@@ -689,8 +710,9 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -710,7 +732,8 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       }
 
       ### update Ki2
-      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      # newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      newx2 <- cbind(Xcand, y1.sample[i])
 
       if (kernel == "sqex") {
         cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
@@ -731,14 +754,15 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       )
 
       fit2$X <- rbind(f2$X, newx2)
-      attr(fit2$X, "scaled:center") <- x.center2
-      attr(fit2$X, "scaled:scale") <- x.scale2
+      # attr(fit2$X, "scaled:center") <- x.center2
+      # attr(fit2$X, "scaled:scale") <- x.scale2
 
       if (constant) {
         fit2$y <- c(f2$y, y2.sample)
       } else {
-        fit2$y <- c(f2$y, y2.sample - y.center2)
-        attr(fit2$y, "scaled:center") <- y.center2
+        # fit2$y <- c(f2$y, y2.sample - y.center2)
+        fit2$y <- c(f2$y, y2.sample)
+        # attr(fit2$y, "scaled:center") <- y.center2
       }
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
@@ -758,7 +782,8 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       }
 
       ### update Ki2
-      newx3 <- scale_inputs(cbind(Xcand, y2.sample), x.center3, x.scale3)
+      # newx3 <- scale_inputs(cbind(Xcand, y2.sample), x.center3, x.scale3)
+      newx3 <- cbind(Xcand, y2.sample)
 
       if (kernel == "sqex") {
         cov.newx3 <- covar.sep(X1 = newx3, d = f3$theta, g = g)
@@ -779,14 +804,15 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       )
 
       fit3$X <- rbind(f3$X, newx3)
-      attr(fit3$X, "scaled:center") <- x.center3
-      attr(fit3$X, "scaled:scale") <- x.scale3
+      # attr(fit3$X, "scaled:center") <- x.center3
+      # attr(fit3$X, "scaled:scale") <- x.scale3
 
       if (constant) {
         fit3$y <- c(f3$y, y3.sample)
       } else {
-        fit3$y <- c(f3$y, y3.sample - y.center3)
-        attr(fit3$y, "scaled:center") <- y.center3
+        # fit3$y <- c(f3$y, y3.sample - y.center3)
+        fit3$y <- c(f3$y, y3.sample)
+        # attr(fit3$y, "scaled:center") <- y.center3
       }
 
       fit3$tau2hat <- drop(t(fit3$y - fit3$mu.hat) %*% fit3$Ki %*% (fit3$y - fit3$mu.hat) / length(fit3$y))
@@ -802,8 +828,9 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       if (constant) {
         fit1$y <- c(f1$y, y1.sample[i])
       } else {
-        fit1$y <- c(f1$y, y1.sample[i] - y.center1)
-        attr(fit1$y, "scaled:center") <- y.center1
+        # fit1$y <- c(f1$y, y1.sample[i] - y.center1)
+        fit1$y <- c(f1$y, y1.sample[i])
+        # attr(fit1$y, "scaled:center") <- y.center1
       }
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
@@ -823,7 +850,8 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       }
 
       ### update Ki2
-      newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      # newx2 <- scale_inputs(cbind(Xcand, y1.sample[i]), x.center2, x.scale2)
+      newx2 <- cbind(Xcand, y1.sample[i])
 
       if (kernel == "sqex") {
         cov.newx2 <- covar.sep(X1 = newx2, d = f2$theta, g = g)
@@ -844,14 +872,15 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       )
 
       fit2$X <- rbind(f2$X, newx2)
-      attr(fit2$X, "scaled:center") <- x.center2
-      attr(fit2$X, "scaled:scale") <- x.scale2
+      # attr(fit2$X, "scaled:center") <- x.center2
+      # attr(fit2$X, "scaled:scale") <- x.scale2
 
       if (constant) {
         fit2$y <- c(f2$y, y2.sample)
       } else {
-        fit2$y <- c(f2$y, y2.sample - y.center2)
-        attr(fit2$y, "scaled:center") <- y.center2
+        # fit2$y <- c(f2$y, y2.sample - y.center2)
+        fit2$y <- c(f2$y, y2.sample)
+        # attr(fit2$y, "scaled:center") <- y.center2
       }
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
@@ -871,7 +900,8 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       }
 
       ### update Ki2
-      newx3 <- scale_inputs(cbind(Xcand, y2.sample), x.center3, x.scale3)
+      # newx3 <- scale_inputs(cbind(Xcand, y2.sample), x.center3, x.scale3)
+      newx3 <- cbind(Xcand, y2.sample)
 
       if (kernel == "sqex") {
         cov.newx3 <- covar.sep(X1 = newx3, d = f3$theta, g = g)
@@ -892,14 +922,15 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
       )
 
       fit3$X <- rbind(f3$X, newx3)
-      attr(fit3$X, "scaled:center") <- x.center3
-      attr(fit3$X, "scaled:scale") <- x.scale3
+      # attr(fit3$X, "scaled:center") <- x.center3
+      # attr(fit3$X, "scaled:scale") <- x.scale3
 
       if (constant) {
         fit3$y <- c(f3$y, y3.sample)
       } else {
-        fit3$y <- c(f3$y, y3.sample - y.center3)
-        attr(fit3$y, "scaled:center") <- y.center3
+        # fit3$y <- c(f3$y, y3.sample - y.center3)
+        fit3$y <- c(f3$y, y3.sample)
+        # attr(fit3$y, "scaled:center") <- y.center3
       }
 
       fit3$tau2hat <- drop(t(fit3$y - fit3$mu.hat) %*% fit3$Ki %*% (fit3$y - fit3$mu.hat) / length(fit3$y))
@@ -1090,13 +1121,13 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
     kernel <- fit$kernel
     g <- fit1$g
 
-    x.center1 <- attr(fit1$X, "scaled:center")
-    x.scale1 <- attr(fit1$X, "scaled:scale")
-    y.center1 <- attr(fit1$y, "scaled:center")
-
-    x.center2 <- attr(fit2$X, "scaled:center")
-    x.scale2 <- attr(fit2$X, "scaled:scale")
-    y.center2 <- attr(fit2$y, "scaled:center")
+    # x.center1 <- attr(fit1$X, "scaled:center")
+    # x.scale1 <- attr(fit1$X, "scaled:scale")
+    # y.center1 <- attr(fit1$y, "scaled:center")
+    #
+    # x.center2 <- attr(fit2$X, "scaled:center")
+    # x.scale2 <- attr(fit2$X, "scaled:scale")
+    # y.center2 <- attr(fit2$y, "scaled:center")
 
 
     ### Generate the candidate set ###
@@ -1199,17 +1230,17 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
     kernel <- fit$kernel
     g <- fit1$g
 
-    x.center1 <- attr(fit1$X, "scaled:center")
-    x.scale1 <- attr(fit1$X, "scaled:scale")
-    y.center1 <- attr(fit1$y, "scaled:center")
-
-    x.center2 <- attr(fit2$X, "scaled:center")
-    x.scale2 <- attr(fit2$X, "scaled:scale")
-    y.center2 <- attr(fit2$y, "scaled:center")
-
-    x.center3 <- attr(fit3$X, "scaled:center")
-    x.scale3 <- attr(fit3$X, "scaled:scale")
-    y.center3 <- attr(fit3$y, "scaled:center")
+    # x.center1 <- attr(fit1$X, "scaled:center")
+    # x.scale1 <- attr(fit1$X, "scaled:scale")
+    # y.center1 <- attr(fit1$y, "scaled:center")
+    #
+    # x.center2 <- attr(fit2$X, "scaled:center")
+    # x.scale2 <- attr(fit2$X, "scaled:scale")
+    # y.center2 <- attr(fit2$y, "scaled:center")
+    #
+    # x.center3 <- attr(fit3$X, "scaled:center")
+    # x.scale3 <- attr(fit3$X, "scaled:scale")
+    # y.center3 <- attr(fit3$y, "scaled:center")
 
 
     ### Generate the candidate set ###
