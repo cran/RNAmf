@@ -13,8 +13,8 @@
 #'
 
 obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
-  fit1 <- f1 <- fit$fit1
-  fit2 <- f2 <- fit$fit2
+  fit1 <- f1 <- fit$fits[[1]]
+  fit2 <- f2 <- fit$fits[[2]]
   constant <- fit$constant
   kernel <- fit$kernel
   g <- fit1$g
@@ -78,9 +78,9 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       }
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
-      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+      return(mean(predict(fit.tmp, Xref)$sig2[[2]])) # to minimize the deduced variance. To maximize, -mean
     }
   } else {
     for (i in 1:mc.sample) {
@@ -94,9 +94,9 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
       }
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
-      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2[[2]]) # to minimize the deduced variance. To maximize, -mean
     }
   }
   return(mean(ALC.out))
@@ -118,8 +118,8 @@ obj.ALC_level_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 #'
 
 obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
-  fit1 <- f1 <- fit$fit1
-  fit2 <- f2 <- fit$fit2
+  fit1 <- f1 <- fit$fits[[1]]
+  fit2 <- f2 <- fit$fits[[2]]
   constant <- fit$constant
   kernel <- fit$kernel
   g <- fit1$g
@@ -181,7 +181,7 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
       ### Choose level 2 ###
       if (kernel == "sqex") {
@@ -231,9 +231,9 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
 
-      fit.tmp$fit2 <- fit2
+      fit.tmp$fits[[2]] <- fit2
 
-      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+      return(mean(predict(fit.tmp, Xref)$sig2[[2]])) # to minimize the deduced variance. To maximize, -mean
     }
   } else {
     ALC.out <- rep(0, mc.sample)
@@ -249,7 +249,7 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
       ### Choose level 2 ###
       if (kernel == "sqex") {
@@ -299,9 +299,9 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
 
-      fit.tmp$fit2 <- fit2
+      fit.tmp$fits[[2]] <- fit2
 
-      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2[[2]]) # to minimize the deduced variance. To maximize, -mean
     }
   }
 
@@ -324,10 +324,9 @@ obj.ALC_level_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore
 #'
 
 obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
-  fit_two_level <- fit$fit.RNAmf_two_level
-  fit1 <- f1 <- fit_two_level$fit1
-  fit2 <- f2 <- fit_two_level$fit2
-  fit3 <- f3 <- fit$fit3
+  fit1 <- f1 <- fit$fits[[1]]
+  fit2 <- f2 <- fit$fits[[2]]
+  fit3 <- f3 <- fit$fits[[3]]
   constant <- fit$constant
   kernel <- fit$kernel
   g <- fit1$g
@@ -393,9 +392,9 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
-      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+      return(mean(predict(fit.tmp, Xref)$sig2[[3]])) # to minimize the deduced variance. To maximize, -mean
     }
   } else {
     ALC.out <- rep(0, mc.sample)
@@ -411,9 +410,9 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
-      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2[[3]]) # to minimize the deduced variance. To maximize, -mean
     }
   }
 
@@ -436,10 +435,9 @@ obj.ALC_level_3_1 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 #'
 
 obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
-  fit_two_level <- fit$fit.RNAmf_two_level
-  fit1 <- f1 <- fit_two_level$fit1
-  fit2 <- f2 <- fit_two_level$fit2
-  fit3 <- f3 <- fit$fit3
+  fit1 <- f1 <- fit$fits[[1]]
+  fit2 <- f2 <- fit$fits[[2]]
+  fit3 <- f3 <- fit$fits[[3]]
   constant <- fit$constant
   kernel <- fit$kernel
   g <- fit1$g
@@ -505,7 +503,7 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
       ### Choose level 2 ###
       if (kernel == "sqex") {
@@ -555,9 +553,9 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
 
-      fit.tmp$fit2 <- fit2
+      fit.tmp$fits[[2]] <- fit2
 
-      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+      return(mean(predict(fit.tmp, Xref)$sig2[[3]])) # to minimize the deduced variance. To maximize, -mean
     }
   } else {
     ALC.out <- rep(0, mc.sample)
@@ -573,7 +571,7 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
       ### Choose level 2 ###
       if (kernel == "sqex") {
@@ -623,9 +621,9 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
 
-      fit.tmp$fit2 <- fit2
+      fit.tmp$fits[[2]] <- fit2
 
-      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2[[3]]) # to minimize the deduced variance. To maximize, -mean
     }
   }
 
@@ -648,10 +646,9 @@ obj.ALC_level_3_2 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 #'
 
 obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, ncore = 1) {
-  fit_two_level <- fit$fit.RNAmf_two_level
-  fit1 <- f1 <- fit_two_level$fit1
-  fit2 <- f2 <- fit_two_level$fit2
-  fit3 <- f3 <- fit$fit3
+  fit1 <- f1 <- fit$fits[[1]]
+  fit2 <- f2 <- fit$fits[[2]]
+  fit3 <- f3 <- fit$fits[[3]]
   constant <- fit$constant
   kernel <- fit$kernel
   g <- fit1$g
@@ -717,7 +714,7 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
       ### Choose level 2 ###
       if (kernel == "sqex") {
@@ -767,7 +764,7 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
 
-      fit.tmp$fit2 <- fit2
+      fit.tmp$fits[[2]] <- fit2
 
       ### Choose level 3 ###
       if (kernel == "sqex") {
@@ -817,9 +814,9 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit3$tau2hat <- drop(t(fit3$y - fit3$mu.hat) %*% fit3$Ki %*% (fit3$y - fit3$mu.hat) / length(fit3$y))
 
-      fit.tmp$fit3 <- fit3
+      fit.tmp$fits[[3]] <- fit3
 
-      return(mean(predict(fit.tmp, Xref)$sig2)) # to minimize the deduced variance. To maximize, -mean
+      return(mean(predict(fit.tmp, Xref)$sig2[[3]])) # to minimize the deduced variance. To maximize, -mean
     }
   } else {
     ALC.out <- rep(0, mc.sample)
@@ -835,7 +832,7 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit1$tau2hat <- drop(t(fit1$y - fit1$mu.hat) %*% fit1$Ki %*% (fit1$y - fit1$mu.hat) / length(fit1$y))
 
-      fit.tmp$fit1 <- fit1
+      fit.tmp$fits[[1]] <- fit1
 
       ### Choose level 2 ###
       if (kernel == "sqex") {
@@ -885,7 +882,7 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit2$tau2hat <- drop(t(fit2$y - fit2$mu.hat) %*% fit2$Ki %*% (fit2$y - fit2$mu.hat) / length(fit2$y))
 
-      fit.tmp$fit2 <- fit2
+      fit.tmp$fits[[2]] <- fit2
 
       ### Choose level 3 ###
       if (kernel == "sqex") {
@@ -935,9 +932,9 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 
       fit3$tau2hat <- drop(t(fit3$y - fit3$mu.hat) %*% fit3$Ki %*% (fit3$y - fit3$mu.hat) / length(fit3$y))
 
-      fit.tmp$fit3 <- fit3
+      fit.tmp$fits[[3]] <- fit3
 
-      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2) # to minimize the deduced variance. To maximize, -mean
+      ALC.out[i] <- mean(predict(fit.tmp, Xref)$sig2[[3]]) # to minimize the deduced variance. To maximize, -mean
     }
   }
 
@@ -968,7 +965,7 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 #' from the posterior distribution of \eqn{f_s(\bm{x}^{[s]}_{n_s+1})}
 #' based on the current design allows to compute \eqn{\tilde{\sigma}_L^{*2}(\bm{\xi};l,\bm{x})}.
 #' Inverse of covariance matrix is computed by the Sherman-Morrison formula.
-#' For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+#' For details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 #'
 #' To search for the next acquisition \eqn{\bm{x^*}} by maximizing AL criterion,
 #' the gradient-based optimization can be used by \code{optim=TRUE}.
@@ -1054,7 +1051,7 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 #' x <- seq(0, 1, length.out = 100)
 #'
 #' ### fit an RNAmf ###
-#' fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+#' fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 #'
 #' ### predict ###
 #' predy <- predict(fit.RNAmf, x)$mu
@@ -1082,15 +1079,15 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, mc.sample, parallel = FALSE, nco
 #'   ylim = c(min(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)),
 #'            max(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)))
 #' )
+#' points(alc.RNAmf$chosen$Xnext,
+#'   alc.RNAmf$ALC$ALC1[which(x == drop(alc.RNAmf$chosen$Xnext))],
+#'   pch = 16, cex = 1, col = "red"
+#' )
 #' plot(x, alc.RNAmf$ALC$ALC2,
 #'   type = "l", lty = 2,
 #'   xlab = "x", ylab = "ALC criterion augmented at the high-fidelity level",
 #'   ylim = c(min(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)),
 #'            max(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)))
-#' )
-#' points(alc.RNAmf$chosen$Xnext,
-#'   alc.RNAmf$ALC$ALC2[which(x == drop(alc.RNAmf$chosen$Xnext))],
-#'   pch = 16, cex = 1, col = "red"
 #' )
 #' par(oldpar)}
 #'
@@ -1110,13 +1107,13 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
     } else if (is.null(cost)) {
       cost <- c(1, 0)
     }
-    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fit1$X)[2], dim(fit$fit1$X)[2])
+    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fits[[1]]$X)[2], dim(fit$fits[[1]]$X)[2])
     if (parallel) registerDoParallel(ncore)
 
-    Icurrent <- mean(predict(fit, Xref)$sig2)
+    Icurrent <- mean(predict(fit, Xref)$sig2[[2]])
 
-    fit1 <- f1 <- fit$fit1
-    fit2 <- f2 <- fit$fit2
+    fit1 <- f1 <- fit$fits[[1]]
+    fit2 <- f2 <- fit$fits[[2]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g
@@ -1217,15 +1214,14 @@ ALC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = NU
     } else if (is.null(cost)) {
       cost <- c(1, 0, 0)
     }
-    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fit.RNAmf_two_level$fit1$X)[2], dim(fit$fit.RNAmf_two_level$fit1$X)[2])
+    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fits[[1]]$X)[2], dim(fit$fits[[1]]$X)[2])
     if (parallel) registerDoParallel(ncore)
 
-    Icurrent <- mean(predict(fit, Xref)$sig2)
+    Icurrent <- mean(predict(fit, Xref)$sig2[[3]])
 
-    fit_two_level <- fit$fit.RNAmf_two_level
-    fit1 <- fit_two_level$fit1
-    fit2 <- fit_two_level$fit2
-    fit3 <- fit$fit3
+    fit1 <- fit$fits[[1]]
+    fit2 <- fit$fits[[2]]
+    fit3 <- fit$fits[[3]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g

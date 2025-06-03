@@ -6,9 +6,9 @@
 #' @noRd
 #'
 
-obj.ALM_level_1 <- function(Xcand, fit) {
+obj.ALM_level_1 <- function(fit, Xcand) {
   newx <- matrix(Xcand, nrow = 1)
-  fit1 <- fit$fit1
+  fit1 <- fit$fits[[1]]
   kernel <- fit$kernel
 
   ### calculate the posterior predictive variance ###
@@ -32,9 +32,9 @@ obj.ALM_level_1 <- function(Xcand, fit) {
 #' @noRd
 #'
 
-obj.ALM_level_2 <- function(Xcand, fit) {
+obj.ALM_level_2 <- function(fit, Xcand) {
   newx <- matrix(Xcand, nrow = 1)
-  -predict(fit, newx)$sig2 # to maximize the current variance.
+  -predict(fit, newx)$sig2[[2]] # to maximize the current variance.
 }
 
 
@@ -46,9 +46,9 @@ obj.ALM_level_2 <- function(Xcand, fit) {
 #' @noRd
 #'
 
-obj.ALM_level_3 <- function(Xcand, fit) {
+obj.ALM_level_3 <- function(fit, Xcand) {
   newx <- matrix(Xcand, nrow = 1)
-  -predict(fit, newx)$sig2 # to maximize the current variance.
+  -predict(fit, newx)$sig2[[3]] # to maximize the current variance.
 }
 
 
@@ -58,7 +58,7 @@ obj.ALM_level_3 <- function(Xcand, fit) {
 #' It calculates the ALM criterion \eqn{\frac{\sigma^{*2}_l(\bm{x})}{\sum^l_{j=1}C_j}},
 #' where \eqn{\sigma^{*2}_l(\bm{x})} is the posterior predictive variance
 #' at each fidelity level \eqn{l} and \eqn{C_j} is the simulation cost at level \eqn{j}.
-#' For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+#' For details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 #'
 #' A new point is acquired on \code{Xcand}. If \code{Xcand=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 #'
@@ -130,7 +130,7 @@ obj.ALM_level_3 <- function(Xcand, fit) {
 #' x <- seq(0, 1, length.out = 100)
 #'
 #' ### fit an RNAmf ###
-#' fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+#' fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 #'
 #' ### predict ###
 #' predy <- predict(fit.RNAmf, x)$mu
@@ -187,8 +187,8 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
     }
     if (parallel) registerDoParallel(ncore)
 
-    fit1 <- fit$fit1
-    fit2 <- fit$fit2
+    fit1 <- fit$fits[[1]]
+    fit2 <- fit$fits[[2]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g
@@ -220,8 +220,8 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
       optm.mat <- foreach(i = 1:nrow(Xcand), .combine = cbind) %dopar% {
         newx <- matrix(Xcand[i, ], nrow = 1)
         return(c(
-          -obj.ALM_level_1(newx, fit = fit),
-          -obj.ALM_level_2(newx, fit = fit)
+          -obj.ALM_level_1(fit = fit, newx),
+          -obj.ALM_level_2(fit = fit, newx)
         ))
       }
     } else {
@@ -230,8 +230,8 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
         print(paste(i, nrow(Xcand), sep = "/"))
         newx <- matrix(Xcand[i, ], nrow = 1)
 
-        optm.mat[1, i] <- -obj.ALM_level_1(newx, fit = fit)
-        optm.mat[2, i] <- -obj.ALM_level_2(newx, fit = fit)
+        optm.mat[1, i] <- -obj.ALM_level_1(fit = fit, newx)
+        optm.mat[2, i] <- -obj.ALM_level_2(fit = fit, newx)
       }
     }
     t2 <- proc.time()
@@ -287,10 +287,9 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
     }
     if (parallel) registerDoParallel(ncore)
 
-    fit_two_level <- fit$fit.RNAmf_two_level
-    fit1 <- fit_two_level$fit1
-    fit2 <- fit_two_level$fit2
-    fit3 <- fit$fit3
+    fit1 <- fit$fits[[1]]
+    fit2 <- fit$fits[[2]]
+    fit3 <- fit$fits[[3]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g
@@ -327,9 +326,9 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
         newx <- matrix(Xcand[i, ], nrow = 1)
 
         return(c(
-          -obj.ALM_level_1(newx, fit = fit_two_level),
-          -obj.ALM_level_2(newx, fit = fit_two_level),
-          -obj.ALM_level_3(newx, fit = fit)
+          -obj.ALM_level_1(fit = fit, newx),
+          -obj.ALM_level_2(fit = fit, newx),
+          -obj.ALM_level_3(fit = fit, newx)
         ))
       }
     } else {
@@ -338,9 +337,9 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
         print(paste(i, nrow(Xcand), sep = "/"))
         newx <- matrix(Xcand[i, ], nrow = 1)
 
-        optm.mat[1, i] <- -obj.ALM_level_1(newx, fit = fit_two_level)
-        optm.mat[2, i] <- -obj.ALM_level_2(newx, fit = fit_two_level)
-        optm.mat[3, i] <- -obj.ALM_level_3(newx, fit = fit)
+        optm.mat[1, i] <- -obj.ALM_level_1(fit = fit, newx)
+        optm.mat[2, i] <- -obj.ALM_level_2(fit = fit, newx)
+        optm.mat[3, i] <- -obj.ALM_level_3(fit = fit, newx)
       }
     }
     t2 <- proc.time()
@@ -349,14 +348,14 @@ ALM_RNAmf <- function(Xcand = NULL, fit, cost = NULL, optim = TRUE, parallel = F
     ### Find the next point ###
     if (optim) {
       X.start <- matrix(Xcand[which.max(optm.mat[1, ]), ], nrow = 1)
-      optim.out <- optim(X.start, obj.ALM_level_1, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit_two_level)
+      optim.out <- optim(X.start, obj.ALM_level_1, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit)
       Xnext.1 <- optim.out$par
       ALM.1 <- -optim.out$value
       t3 <- proc.time()
       if(trace) cat("Running optim for level 1:", (t3 - t2)[3], "seconds\n")
 
       X.start <- matrix(Xcand[which.max(optm.mat[2, ]), ], nrow = 1)
-      optim.out <- optim(X.start, obj.ALM_level_2, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit_two_level)
+      optim.out <- optim(X.start, obj.ALM_level_2, method = "L-BFGS-B", lower = 0, upper = 1, fit = fit)
       Xnext.2 <- optim.out$par
       ALM.2 <- -optim.out$value
       t4 <- proc.time()

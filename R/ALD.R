@@ -6,13 +6,13 @@
 #' @noRd
 #'
 
-obj.ALD_V1_2level <- function(Xcand, fit) { # low
+obj.ALD_V1_2level <- function(fit, Xcand) { # low
   newx <- matrix(Xcand, nrow = 1)
 
   kernel <- fit$kernel
   constant <- fit$constant
-  fit1 <- fit$fit1
-  fit2 <- fit$fit2
+  fit1 <- fit$fits[[1]]
+  fit2 <- fit$fits[[2]]
 
   if (kernel == "sqex") {
     if (constant) {
@@ -330,13 +330,13 @@ obj.ALD_V1_2level <- function(Xcand, fit) { # low
 #' @noRd
 #'
 
-obj.ALD_V2_2level <- function(Xcand, fit) { # high
+obj.ALD_V2_2level <- function(fit, Xcand) { # high
   newx <- matrix(Xcand, nrow = 1)
 
   kernel <- fit$kernel
   constant <- fit$constant
-  fit1 <- fit$fit1
-  fit2 <- fit$fit2
+  fit1 <- fit$fits[[1]]
+  fit2 <- fit$fits[[2]]
 
   if (kernel == "sqex") {
     if (constant) {
@@ -658,14 +658,13 @@ obj.ALD_V2_2level <- function(Xcand, fit) { # high
 #' @noRd
 #'
 
-obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1) { # low
+obj.ALD_V1_3level <- function(fit, Xcand, mc.sample, parallel = FALSE, ncore = 1) { # low
 
   kernel <- fit$kernel
   constant <- fit$constant
-  fit.RNAmf_two_level <- fit$fit.RNAmf_two_level
-  fit1 <- fit.RNAmf_two_level$fit1
-  fit2 <- fit.RNAmf_two_level$fit2
-  fit3 <- fit$fit3
+  fit1 <- fit$fits[[1]]
+  fit2 <- fit$fits[[2]]
+  fit3 <- fit$fits[[3]]
 
   d <- ncol(fit1$X)
   newx <- matrix(Xcand, nrow = 1)
@@ -1162,12 +1161,12 @@ obj.ALD_V1_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
 #' @noRd
 #'
 
-obj.ALD_V2_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1) { # med
+obj.ALD_V2_3level <- function(fit, Xcand, mc.sample, parallel = FALSE, ncore = 1) { # med
 
-  V <- predict(fit, Xcand)$sig2
+  V <- predict(fit, Xcand)$sig2[[3]]
   EVE <- V +
-    obj.ALD_V1_3level(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1) +# -V1
-    obj.ALD_V3_3level(Xcand, fit) # -V3
+    obj.ALD_V1_3level(fit, Xcand, mc.sample, parallel = FALSE, ncore = 1) +# -V1
+    obj.ALD_V3_3level(fit, Xcand) # -V3
 
   return(-EVE) # to maximize the V2.
 }
@@ -1181,21 +1180,20 @@ obj.ALD_V2_3level <- function(Xcand, fit, mc.sample, parallel = FALSE, ncore = 1
 #' @noRd
 #'
 
-obj.ALD_V3_3level <- function(Xcand, fit) { # high
+obj.ALD_V3_3level <- function(fit, Xcand) { # high
   newx <- matrix(Xcand, nrow = 1)
 
   kernel <- fit$kernel
   constant <- fit$constant
-  fit.RNAmf_two_level <- fit$fit.RNAmf_two_level
-  fit1 <- fit.RNAmf_two_level$fit1
-  fit2 <- fit.RNAmf_two_level$fit2
-  fit3 <- fit$fit3
+  fit1 <- fit$fits[[1]]
+  fit2 <- fit$fits[[2]]
+  fit3 <- fit$fits[[3]]
 
   if (kernel == "sqex") {
     if (constant) {
-      pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, newx)
-      x.mu <- pred.RNAmf_two_level$mu
-      sig2 <- pred.RNAmf_two_level$sig2
+      pred.RNAmf_two_level <- predict(fit, newx)
+      x.mu <- pred.RNAmf_two_level$mu[[2]]
+      sig2 <- pred.RNAmf_two_level$sig2[[2]]
 
       d <- ncol(fit1$X)
       newx <- matrix(newx, ncol = d)
@@ -1231,9 +1229,9 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
 
       EEV <- tau2hat - tau2hat * sum(diag(Ci %*% mat))
     } else {
-      pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, newx)
-      x.mu <- pred.RNAmf_two_level$mu
-      sig2 <- pred.RNAmf_two_level$sig2
+      pred.RNAmf_two_level <- predict(fit, newx)
+      x.mu <- pred.RNAmf_two_level$mu[[2]]
+      sig2 <- pred.RNAmf_two_level$sig2[[2]]
 
       d <- ncol(fit1$X)
       newx <- matrix(newx, ncol = d)
@@ -1273,9 +1271,9 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
     if (constant) {
       d <- ncol(fit1$X)
       newx <- matrix(newx, ncol = d)
-      pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, newx)
-      x.mu <- pred.RNAmf_two_level$mu
-      sig2 <- pred.RNAmf_two_level$sig2
+      pred.RNAmf_two_level <- predict(fit, newx)
+      x.mu <- pred.RNAmf_two_level$mu[[2]]
+      sig2 <- pred.RNAmf_two_level$sig2[[2]]
 
       ### calculate the closed form ###
       X3 <- matrix(fit3$X[, -(d + 1)], ncol = d)
@@ -1324,9 +1322,9 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
     } else {
       d <- ncol(fit1$X)
       newx <- matrix(newx, ncol = d)
-      pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, newx)
-      x.mu <- pred.RNAmf_two_level$mu
-      sig2 <- pred.RNAmf_two_level$sig2
+      pred.RNAmf_two_level <- predict(fit, newx)
+      x.mu <- pred.RNAmf_two_level$mu[[2]]
+      sig2 <- pred.RNAmf_two_level$sig2[[2]]
 
       ### calculate the closed form ###
       X3 <- matrix(fit3$X[, -(d + 1)], ncol = d)
@@ -1377,9 +1375,9 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
     if (constant) {
       d <- ncol(fit1$X)
       newx <- matrix(newx, ncol = d)
-      pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, newx)
-      x.mu <- pred.RNAmf_two_level$mu
-      sig2 <- pred.RNAmf_two_level$sig2
+      pred.RNAmf_two_level <- predict(fit, newx)
+      x.mu <- pred.RNAmf_two_level$mu[[2]]
+      sig2 <- pred.RNAmf_two_level$sig2[[2]]
 
       ### calculate the closed form ###
       X3 <- matrix(fit3$X[, -(d + 1)], ncol = d)
@@ -1437,9 +1435,9 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
     } else {
       d <- ncol(fit1$X)
       newx <- matrix(newx, ncol = d)
-      pred.RNAmf_two_level <- predict(fit.RNAmf_two_level, newx)
-      x.mu <- pred.RNAmf_two_level$mu
-      sig2 <- pred.RNAmf_two_level$sig2
+      pred.RNAmf_two_level <- predict(fit, newx)
+      x.mu <- pred.RNAmf_two_level$mu[[2]]
+      sig2 <- pred.RNAmf_two_level$sig2[[2]]
 
       ### calculate the closed form ###
       X3 <- matrix(fit3$X[, -(d + 1)], ncol = d)
@@ -1507,7 +1505,7 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
 #' It calculates the ALD criterion \eqn{\frac{V_l(\bm{x})}{\sum^l_{j=1}C_j}},
 #' where \eqn{V_l(\bm{x})} is the contribution of GP emulator
 #' at each fidelity level \eqn{l} and \eqn{C_j} is the simulation cost at level \eqn{j}.
-#' For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+#' For details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 #'
 #' A new point is acquired on \code{Xcand}. If \code{Xcand=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 #'
@@ -1580,7 +1578,7 @@ obj.ALD_V3_3level <- function(Xcand, fit) { # high
 #' x <- seq(0, 1, length.out = 100)
 #'
 #' ### fit an RNAmf ###
-#' fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+#' fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 #'
 #' ### predict ###
 #' predy <- predict(fit.RNAmf, x)$mu
@@ -1637,8 +1635,8 @@ ALD_RNAmf <- function(Xcand = NULL, fit, mc.sample = 100, cost = NULL, optim = T
     }
     if (parallel) registerDoParallel(ncore)
 
-    fit1 <- fit$fit1
-    fit2 <- fit$fit2
+    fit1 <- fit$fits[[1]]
+    fit2 <- fit$fits[[2]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g
@@ -1728,10 +1726,9 @@ ALD_RNAmf <- function(Xcand = NULL, fit, mc.sample = 100, cost = NULL, optim = T
     }
     if (parallel) registerDoParallel(ncore)
 
-    fit_two_level <- fit$fit.RNAmf_two_level
-    fit1 <- fit_two_level$fit1
-    fit2 <- fit_two_level$fit2
-    fit3 <- fit$fit3
+    fit1 <- fit$fits[[1]]
+    fit2 <- fit$fits[[2]]
+    fit3 <- fit$fits[[3]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g

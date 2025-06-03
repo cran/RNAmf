@@ -2,33 +2,33 @@
 % Please edit documentation in R/predict.RNAmf.R
 \name{predict.RNAmf}
 \alias{predict.RNAmf}
-\title{prediction of the RNAmf emulator with 2 or 3 fidelity levels.}
+\title{prediction of the RNAmf emulator with multiple fidelity levels.}
 \usage{
 \method{predict}{RNAmf}(object, x, ...)
 }
 \arguments{
-\item{object}{a class \code{RNAmf} object fitted by \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}}.}
+\item{object}{An object of class \code{RNAmf} fitted by \code{\link{RNAmf}}.}
 
-\item{x}{vector or matrix of new input locations to predict.}
+\item{x}{A vector or matrix of new input locations for prediction.}
 
-\item{...}{for compatibility with generic method \code{predict}.}
+\item{...}{Additional arguments for compatibility with generic method \code{predict}.}
 }
 \value{
 \itemize{
-  \item \code{mu}: vector of predictive posterior mean.
-  \item \code{sig2}: vector of predictive posterior variance.
-  \item \code{time}: a scalar of the time for the computation.
+  \item \code{mu}: A list of vectors containing the predictive posterior mean at each fidelity level.
+  \item \code{sig2}: A list of vectors containing the predictive posterior variance at each fidelity level.
+  \item \code{time}: A scalar indicating the computation time.
 }
 }
 \description{
-The function computes the posterior mean and variance of RNA models with two or three fidelity levels
-by fitted model using \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}}.
+The function computes the posterior mean and variance of RNA models with multiple fidelity levels
+by fitted model from \code{\link{RNAmf}}.
 }
 \details{
-From the model fitted by \code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}},
-the posterior mean and variance are calculated based on the closed form expression derived by a recursive fashion.
+From the fitted model from \code{\link{RNAmf}},
+the posterior mean and variance are calculated based on the closed-form expression derived by a recursive fashion.
 The formulas depend on its kernel choices.
-For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+For further details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 }
 \examples{
 \donttest{
@@ -68,11 +68,11 @@ y2 <- f2(X2)
 x <- seq(0, 1, length.out = 100)
 
 ### fit an RNAmf ###
-fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 
 ### predict ###
-predy <- predict(fit.RNAmf, x)$mu
-predsig2 <- predict(fit.RNAmf, x)$sig2
+predy <- predict(fit.RNAmf, x)$mu[[2]]
+predsig2 <- predict(fit.RNAmf, x)$sig2[[2]]
 
 ### RMSE ###
 print(sqrt(mean((predy - f2(x))^2)))
@@ -139,12 +139,12 @@ y3 <- apply(X3,1,output.branin, l=3)
 x <- as.matrix(expand.grid(seq(0, 1, length.out = 100),seq(0, 1, length.out = 100)))
 
 ### fit an RNAmf ###
-fit.RNAmf <- RNAmf_three_level(X1, y1, X2, y2, X3, y3, kernel = "sqex")
+fit.RNAmf <- RNAmf(list(X1, X2, X3), list(y1, y2, y3), kernel = "sqex", constant=TRUE)
 
 ### predict ###
 pred.RNAmf <- predict(fit.RNAmf, x)
-predy <- pred.RNAmf$mu
-predsig2 <- pred.RNAmf$sig2
+predy <- pred.RNAmf$mu[[3]]
+predsig2 <- pred.RNAmf$sig2[[3]]
 
 ### RMSE ###
 print(sqrt(mean((predy - apply(x,1,output.branin, l=3))^2)))
@@ -160,8 +160,7 @@ par(oldpar)
 
 ### predictive variance ###
 print(predsig2)}
-
 }
 \seealso{
-\code{\link{RNAmf_two_level}} or \code{\link{RNAmf_three_level}} for the model.
+\code{\link{RNAmf}} for model fitting.
 }

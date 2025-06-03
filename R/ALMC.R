@@ -10,7 +10,7 @@
 #' \eqn{\text{argmax}_{l\in\{1,\ldots,L\}} \frac{\Delta \sigma_L^{2}(l,\bm{x^*})}{\sum^l_{j=1}C_j}},
 #' where \eqn{C_j} is the simulation cost at level \eqn{j}.
 #' See \code{\link{ALC_RNAmf}}.
-#' For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+#' For details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 #'
 #' A new point is acquired on \code{Xcand}. If \code{Xcand=NULL} and \code{Xref=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 #'
@@ -88,7 +88,7 @@
 #' x <- seq(0, 1, length.out = 100)
 #'
 #' ### fit an RNAmf ###
-#' fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+#' fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 #'
 #' ### predict ###
 #' predy <- predict(fit.RNAmf, x)$mu
@@ -151,13 +151,13 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
     } else if (is.null(cost)) {
       cost <- c(1, 0)
     }
-    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fit1$X)[2], dim(fit$fit1$X)[2])
+    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fits[[1]]$X)[2], dim(fit$fits[[1]]$X)[2])
     if (parallel) registerDoParallel(ncore)
 
-    Icurrent <- mean(predict(fit, Xref)$sig2)
+    Icurrent <- mean(predict(fit, Xref)$sig2[[2]])
 
-    fit1 <- f1 <- fit$fit1
-    fit2 <- f2 <- fit$fit2
+    fit1 <- f1 <- fit$fits[[1]]
+    fit2 <- f2 <- fit$fits[[2]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g
@@ -215,7 +215,7 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
       if (parallel) {
         optm.mat <- foreach(i = 1:nrow(Xcand), .combine = cbind) %dopar% {
           newx <- matrix(Xcand[i, ], nrow = 1)
-          return(c(-obj.ALM_level_2(newx, fit = fit)))
+          return(c(-obj.ALM_level_2(fit = fit, newx)))
         }
       } else {
         optm.mat <- c(rep(0, nrow(Xcand)))
@@ -223,7 +223,7 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
           print(paste(i, nrow(Xcand), sep = "/"))
           newx <- matrix(Xcand[i, ], nrow = 1)
 
-          optm.mat[i] <- -obj.ALM_level_2(newx, fit = fit)
+          optm.mat[i] <- -obj.ALM_level_2(fit = fit, newx)
         }
       }
       Xnext <- matrix(Xcand[which.max(optm.mat), ], nrow = 1)
@@ -295,15 +295,14 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
     } else if (is.null(cost)) {
       cost <- c(1, 0, 0)
     }
-    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fit.RNAmf_two_level$fit1$X)[2], dim(fit$fit.RNAmf_two_level$fit1$X)[2])
+    if (is.null(Xref)) Xref <- randomLHS(100 * dim(fit$fits[[1]]$X)[2], dim(fit$fits[[1]]$X)[2])
     if (parallel) registerDoParallel(ncore)
 
-    Icurrent <- mean(predict(fit, Xref)$sig2)
+    Icurrent <- mean(predict(fit, Xref)$sig2[[3]])
 
-    fit_two_level <- fit$fit.RNAmf_two_level
-    fit1 <- fit_two_level$fit1
-    fit2 <- fit_two_level$fit2
-    fit3 <- fit$fit3
+    fit1 <- fit$fits[[1]]
+    fit2 <- fit$fits[[2]]
+    fit3 <- fit$fits[[3]]
     constant <- fit$constant
     kernel <- fit$kernel
     g <- fit1$g
@@ -365,7 +364,7 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
       if (parallel) {
         optm.mat <- foreach(i = 1:nrow(Xcand), .combine = cbind) %dopar% {
           newx <- matrix(Xcand[i, ], nrow = 1)
-          return(c(-obj.ALM_level_3(newx, fit = fit)))
+          return(c(-obj.ALM_level_3(fit = fit, newx)))
         }
       } else {
         optm.mat <- c(rep(0, nrow(Xcand)))
@@ -373,7 +372,7 @@ ALMC_RNAmf <- function(Xref = NULL, Xcand = NULL, fit, mc.sample = 100, cost = N
           print(paste(i, nrow(Xcand), sep = "/"))
           newx <- matrix(Xcand[i, ], nrow = 1)
 
-          optm.mat[i] <- -obj.ALM_level_3(newx, fit = fit)
+          optm.mat[i] <- -obj.ALM_level_3(fit = fit, newx)
         }
       }
       Xnext <- matrix(Xcand[which.max(optm.mat), ], nrow = 1)

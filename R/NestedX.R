@@ -29,26 +29,24 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
   return(list(X = X1, le = length(indice)))
 }
 
-#' Constructing the nested design sets for RNA model.
+#' @title Constructing nested design sets for the RNA model.
 #'
-#' @description The function constructs the nested design sets with two fidelity levels
-#' \eqn{\mathcal{X}_2 \subseteq \mathcal{X}_{1}} for \code{\link{RNAmf_two_level}} or
-#' three fidelity levels \eqn{\mathcal{X}_3 \subseteq \mathcal{X}_2 \subseteq \mathcal{X}_{1}}
-#' for \code{\link{RNAmf_three_level}}.
+#' @description The function constructs nested design sets with multiple fidelity levels
+#' \eqn{\mathcal{X}_l \subseteq \cdots \subseteq \mathcal{X}_{1}} for use in \code{\link{RNAmf}}.
 #'
 #' @details The procedure replace the points of lower level design \eqn{\mathcal{X}_{l-1}}
-#' to the closest points of higher level design \eqn{\mathcal{X}_{l}}.
-#' The length of the \eqn{\mathcal{X}_{l-1}} could be larger than the user specified.
-#' For details, see "\href{http://cran.nexr.com/web/packages/MuFiCokriging/MuFiCokriging.pdf}{\code{NestedDesign}}".
+#' with the closest points from higher level design \eqn{\mathcal{X}_{l}}.
+#' The length of \eqn{\mathcal{X}_{l-1}} may be larger than the user specified size.
+#' For details, see "\href{https://github.com/cran/MuFiCokriging}{\code{NestedDesign}}".
 #'
 #' @references
 #' L. Le Gratiet and J. Garnier (2014). Recursive co-kriging model for design of computer experiments
 #' with multiple levels of fidelity. \emph{International Journal for Uncertainty Quantification}, 4(5), 365-386;
 #' \doi{doi:10.1615/Int.J.UncertaintyQuantification.2014006914}
 #'
-#' @param n vector of the number of design points at each fidelity level \eqn{l}. Thus, the vector must have a positive value \eqn{n_1, n_2} or \eqn{n_1, n_2, n_3} where \eqn{n_1 > n_2 > n_3}.
-#' @param d constant of the dimension of the design.
-#' @return A list containing the design at each level, i.e., \eqn{\mathcal{X}_{1}, \mathcal{X}_{2}} or \eqn{\mathcal{X}_{1}, \mathcal{X}_{2}, \mathcal{X}_{3}}.
+#' @param n A vector specifying the number of design points at each fidelity level \eqn{l}. Thus, the vector must have a positive value \eqn{n_1, \ldots, n_l} where \eqn{n_1 > \cdots > n_l}.
+#' @param d A positive integer specifying the dimension of the design.
+#' @return A list containing the nested design sets at each level, i.e., \eqn{\mathcal{X}_{1}, \ldots, \mathcal{X}_{l}}.
 #' @export
 #' @examples
 #' ### number of design points ###
@@ -69,9 +67,9 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
 #' points(NX[[2]], col="blue", pch=4)
 #'
 
-
 NestedX <- function(n, d) { # n; vector, d; dim
 
+  # Input validation
   if (is.unsorted(rev(n), strictly = TRUE)) {
     stop("The number of design at each level must be descending order \n")
   }
@@ -82,49 +80,35 @@ NestedX <- function(n, d) { # n; vector, d; dim
     stop("The dimension of design at each level must be same \n")
   }
 
-  ### generating initial designs ###
   level <- length(n)
   if (level < 2) {
     stop("The level of design should be larger than 1 \n")
-  } else if (level == 2) {
-    X1 <- maximinLHS(n[1], d)
-    X2 <- maximinLHS(n[2], d)
-    X <- list(X1, X2)
-  } else if (level == 3) {
-    X1 <- maximinLHS(n[1], d)
-    X2 <- maximinLHS(n[2], d)
-    X3 <- maximinLHS(n[3], d)
-    X <- list(X1, X2, X3)
   }
 
-  ### subsetting designs ###
+  # Generating initial designs
+  X <- list()
+  for (i in 1:level) {
+    X[[i]] <- maximinLHS(n[i], d)
+  }
+
+  # Subsetting designs
   indices <- list()
   for (i in (level - 1):1) {
     SB <- subsetX(matrix(X[[i]], ncol=d), matrix(X[[i + 1]], ncol=d))
     X[[i]] <- SB$X
-    n <- dim(SB$X)[1]
-    indices[[i]] <- seq(n - SB$le + 1, n, by = 1)
+    n_rows <- nrow(SB$X)
+    indices[[i]] <- seq(n_rows - SB$le + 1, n_rows, by = 1)
   }
 
-  ### assigning the design, indices, and the number of data at each level ###
-  n <- c()
-  for (i in 1:(level - 1)) {
-    n[i] <- length(indices[[i]])
-  }
-  X.nested <- list()
-  X.nested$X <- X[[1]]
-  X.nested$ind <- indices
-  X.nested$n <- n
-
-
-  if (level == 2) {
-    X <- list(X.nested$X, matrix(X.nested$X[X.nested$ind[[1]], ], ncol = d))
-  } else if (level == 3) {
-    X <- list(
-      X.nested$X, matrix(X.nested$X[X.nested$ind[[1]], ], ncol = d),
-      matrix(X.nested$X[X.nested$ind[[1]][X.nested$ind[[2]]], ], ncol = d)
-    )
+  # Constructing nested designs
+  X_list <- list()
+  current_idx <- 1:nrow(X[[1]])
+  for (k in 1:level) {
+    if (k > 1) {
+      current_idx <- current_idx[indices[[k-1]]]
+    }
+    X_list[[k]] <- matrix(X[[1]][current_idx, ], ncol = d)
   }
 
-  return(X = X)
+  return(X = X_list)
 }

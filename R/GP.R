@@ -12,21 +12,19 @@
 #' @param y vector of response values.
 #' @param g nugget parameter. Default is 1.490116e-08.
 #' @param constant logical indicating for constant mean (constant=TRUE) or zero mean (constant=FALSE). Default is FALSE.
-#' @param p quantile on distances. Default is 0.01
-#' @param min_cor minimal correlation between two design points at the defined quantile distance. Default is 0.01.
+#' @param p quantile on distances. Default is 0.01.
+#' @param min_cor minimal correlation between two design points at the defined p quantile distance. Default is 0.01.
 #' @param max_cor maximal correlation between two design points at the defined (1-p) quantile distance. Default is 0.5.
 #'
 #' @return A list containing hyperparameters, covariance inverse matrix, X, y and logical inputs:
 #' \itemize{
+#'   \item \code{Ki}: matrix of covariance inverse.
+#'   \item \code{X}: copy of X.
+#'   \item \code{y}: copy of y.
 #'   \item \code{theta}: vector of lengthscale hyperparameter.
 #'   \item \code{g}: copy of g.
-#'   \item \code{Ki}: matrix of covariance inverse.
 #'   \item \code{mu.hat}: optimized constant mean. If constant=FALSE, 0.
-#'   \item \code{X}: copy of X. If Xscale=TRUE, scaled X.
-#'   \item \code{y}: copy of y. If Yscale=TRUE, scaled y.
 #'   \item \code{tau2hat}: estimated scale hyperparameter.
-#'   \item \code{Xscale}: copy of Xscale.
-#'   \item \code{Yscale}: copy of Yscale.
 #'   \item \code{constant}: copy of constant.
 #' }
 #'

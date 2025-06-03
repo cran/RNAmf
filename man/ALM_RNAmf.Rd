@@ -36,7 +36,7 @@ The function acquires the new point by the Active learning MacKay (ALM) criterio
 It calculates the ALM criterion \eqn{\frac{\sigma^{*2}_l(\bm{x})}{\sum^l_{j=1}C_j}},
 where \eqn{\sigma^{*2}_l(\bm{x})} is the posterior predictive variance
 at each fidelity level \eqn{l} and \eqn{C_j} is the simulation cost at level \eqn{j}.
-For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+For details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 
 A new point is acquired on \code{Xcand}. If \code{Xcand=NULL}, a new point is acquired on unit hypercube \eqn{[0,1]^d}.
 }
@@ -84,7 +84,7 @@ y2 <- f2(X2)
 x <- seq(0, 1, length.out = 100)
 
 ### fit an RNAmf ###
-fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 
 ### predict ###
 predy <- predict(fit.RNAmf, x)$mu

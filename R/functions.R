@@ -25,10 +25,10 @@ scale_inputs <- function(X, center = NULL, scale = NULL, back = FALSE) {
 
 #' Check the design is nested
 #'
-#' @param X1 vector or matrix of input locations at lower fidelity
-#' @param X2 vector or matrix of input locations at higher fidelity
+#' @param XX1 vector or matrix of input locations at lower fidelity
+#' @param XX2 vector or matrix of input locations at higher fidelity
 #'
-#' @return A logical indicating if X2 is nested or not.
+#' @return A logical indicating if XX2 is nested or not.
 #'
 #' @noRd
 #'

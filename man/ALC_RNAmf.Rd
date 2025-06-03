@@ -58,7 +58,7 @@ Due to the nested assumption, imputing \eqn{y^{[s]}_{n_s+1}} for each \eqn{1\leq
 from the posterior distribution of \eqn{f_s(\bm{x}^{[s]}_{n_s+1})}
 based on the current design allows to compute \eqn{\tilde{\sigma}_L^{*2}(\bm{\xi};l,\bm{x})}.
 Inverse of covariance matrix is computed by the Sherman-Morrison formula.
-For details, see Heo and Sung (2024, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
+For details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401706.2024.2376173}>).
 
 To search for the next acquisition \eqn{\bm{x^*}} by maximizing AL criterion,
 the gradient-based optimization can be used by \code{optim=TRUE}.
@@ -116,7 +116,7 @@ y2 <- f2(X2)
 x <- seq(0, 1, length.out = 100)
 
 ### fit an RNAmf ###
-fit.RNAmf <- RNAmf_two_level(X1, y1, X2, y2, kernel = "sqex")
+fit.RNAmf <- RNAmf(list(X1, X2), list(y1, y2), kernel = "sqex", constant=TRUE)
 
 ### predict ###
 predy <- predict(fit.RNAmf, x)$mu
@@ -144,15 +144,15 @@ plot(x, alc.RNAmf$ALC$ALC1,
   ylim = c(min(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)),
            max(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)))
 )
+points(alc.RNAmf$chosen$Xnext,
+  alc.RNAmf$ALC$ALC1[which(x == drop(alc.RNAmf$chosen$Xnext))],
+  pch = 16, cex = 1, col = "red"
+)
 plot(x, alc.RNAmf$ALC$ALC2,
   type = "l", lty = 2,
   xlab = "x", ylab = "ALC criterion augmented at the high-fidelity level",
   ylim = c(min(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)),
            max(c(alc.RNAmf$ALC$ALC1, alc.RNAmf$ALC$ALC2)))
-)
-points(alc.RNAmf$chosen$Xnext,
-  alc.RNAmf$ALC$ALC2[which(x == drop(alc.RNAmf$chosen$Xnext))],
-  pch = 16, cex = 1, col = "red"
 )
 par(oldpar)}
 

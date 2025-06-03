@@ -2,29 +2,27 @@
 % Please edit documentation in R/NestedX.R
 \name{NestedX}
 \alias{NestedX}
-\title{Constructing the nested design sets for RNA model.}
+\title{Constructing nested design sets for the RNA model.}
 \usage{
 NestedX(n, d)
 }
 \arguments{
-\item{n}{vector of the number of design points at each fidelity level \eqn{l}. Thus, the vector must have a positive value \eqn{n_1, n_2} or \eqn{n_1, n_2, n_3} where \eqn{n_1 > n_2 > n_3}.}
+\item{n}{A vector specifying the number of design points at each fidelity level \eqn{l}. Thus, the vector must have a positive value \eqn{n_1, \ldots, n_l} where \eqn{n_1 > \cdots > n_l}.}
 
-\item{d}{constant of the dimension of the design.}
+\item{d}{A positive integer specifying the dimension of the design.}
 }
 \value{
-A list containing the design at each level, i.e., \eqn{\mathcal{X}_{1}, \mathcal{X}_{2}} or \eqn{\mathcal{X}_{1}, \mathcal{X}_{2}, \mathcal{X}_{3}}.
+A list containing the nested design sets at each level, i.e., \eqn{\mathcal{X}_{1}, \ldots, \mathcal{X}_{l}}.
 }
 \description{
-The function constructs the nested design sets with two fidelity levels
-\eqn{\mathcal{X}_2 \subseteq \mathcal{X}_{1}} for \code{\link{RNAmf_two_level}} or
-three fidelity levels \eqn{\mathcal{X}_3 \subseteq \mathcal{X}_2 \subseteq \mathcal{X}_{1}}
-for \code{\link{RNAmf_three_level}}.
+The function constructs nested design sets with multiple fidelity levels
+\eqn{\mathcal{X}_l \subseteq \cdots \subseteq \mathcal{X}_{1}} for use in \code{\link{RNAmf}}.
 }
 \details{
 The procedure replace the points of lower level design \eqn{\mathcal{X}_{l-1}}
-to the closest points of higher level design \eqn{\mathcal{X}_{l}}.
-The length of the \eqn{\mathcal{X}_{l-1}} could be larger than the user specified.
-For details, see "\href{http://cran.nexr.com/web/packages/MuFiCokriging/MuFiCokriging.pdf}{\code{NestedDesign}}".
+with the closest points from higher level design \eqn{\mathcal{X}_{l}}.
+The length of \eqn{\mathcal{X}_{l-1}} may be larger than the user specified size.
+For details, see "\href{https://github.com/cran/MuFiCokriging}{\code{NestedDesign}}".
 }
 \examples{
 ### number of design points ###
