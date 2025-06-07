@@ -1,7 +1,7 @@
 Package: RNAmf
 Type: Package
 Title: Recursive Non-Additive Emulator for Multi-Fidelity Data
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: c(
 	person(given="Junoh", family="Heo", role=c("aut", "cre"), email="heojunoh@msu.edu"), 	     	person(given="Chih-Li", family="Sung", role="aut", email="sungchih@msu.edu")
 	)
@@ -13,8 +13,8 @@ Imports: plgp, stats, methods, lhs, doParallel, foreach
 Suggests: knitr, rmarkdown
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2025-06-02 23:49:23 UTC; junoh
+Packaged: 2025-06-07 03:41:00 UTC; junoh
 Author: Junoh Heo [aut, cre],
   Chih-Li Sung [aut]
 Repository: CRAN
-Date/Publication: 2025-06-03 00:40:02 UTC
+Date/Publication: 2025-06-07 23:40:02 UTC

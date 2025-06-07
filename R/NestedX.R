@@ -47,6 +47,7 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
 #' @param n A vector specifying the number of design points at each fidelity level \eqn{l}. Thus, the vector must have a positive value \eqn{n_1, \ldots, n_l} where \eqn{n_1 > \cdots > n_l}.
 #' @param d A positive integer specifying the dimension of the design.
 #' @return A list containing the nested design sets at each level, i.e., \eqn{\mathcal{X}_{1}, \ldots, \mathcal{X}_{l}}.
+#' @importFrom lhs maximinLHS
 #' @export
 #' @examples
 #' ### number of design points ###
