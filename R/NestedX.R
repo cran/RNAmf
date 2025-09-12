@@ -14,14 +14,25 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
   d <- dim(as.matrix(X2))[2] # d2
   n2 <- dim(as.matrix(X2))[1] # n2
   n1 <- dim(as.matrix(X1))[1] # n1
+  if (n2 > n1) stop("Need n1 >= n2 to nest: lower level must have >= points than higher level.")
 
-  dist <- 0
-  for (i in 1:d) {
-    grid <- expand.grid(X2[, i], X1[, i])
-    dist <- dist + (grid[, 1] - grid[, 2])^2
+  a <- rowSums(X2^2)                # length n2
+  b <- rowSums(X1^2)                # length n1
+  D <- outer(a, b, "+") - 2 * (X2 %*% t(X1))  # n2 x n1 squared distances
+
+  taken <- rep(FALSE, n1)
+  indice <- integer(n2)
+
+  # process rows in order of their best available distance (helps quality)
+  row_order <- order(apply(D, 1, min))
+  for (r in row_order) {
+    # try nearest, then next nearest, until we find a free column
+    cols <- order(D[r, ])
+    c <- cols[which(!taken[cols])[1]]
+    if (is.na(c)) stop("Greedy matching failed (shouldn't happen if n1 >= n2).")
+    taken[c] <- TRUE
+    indice[r] <- c
   }
-  dist.mat <- matrix(dist, n2, n1)
-  indice <- max.col(-(dist.mat)) # find the minimum distance of column at each row
 
   X1 <- matrix(X1[-indice, ], ncol=d)
   X1 <- rbind(X1, matrix(X2, ncol=d))
@@ -36,7 +47,6 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
 #'
 #' @details The procedure replace the points of lower level design \eqn{\mathcal{X}_{l-1}}
 #' with the closest points from higher level design \eqn{\mathcal{X}_{l}}.
-#' The length of \eqn{\mathcal{X}_{l-1}} may be larger than the user specified size.
 #' For details, see "\href{https://github.com/cran/MuFiCokriging}{\code{NestedDesign}}".
 #'
 #' @references

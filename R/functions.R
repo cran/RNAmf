@@ -43,3 +43,31 @@ checknested <- function(XX1, XX2) {
   checknest[is.na(checknest)] <- FALSE
   all(checknest)
 }
+
+#' Match rows between two nested designs
+#'
+#' @param X_sup Matrix of the design at the lower fidelity level (the superset).
+#' @param X_sub Matrix of the design at the higher fidelity level (the subset).
+#' @return An integer vector of indices such that each element corresponds
+#'   to the row position in \code{X_sup} matching the respective row in \code{X_sub}.
+#' @details
+#' This function is used to align the higher-level design points with their
+#' corresponding points in the lower-level design when the designs are nested.
+#' Matching is done by converting each row to a unique key string after rounding
+#' to 12 decimal places, to avoid mismatches caused by floating-point precision.
+#' @noRd
+
+.match_rows <- function(X_sup, X_sub) {
+  as_key <- function(M) {
+    if (!is.matrix(M)) M <- as.matrix(M)
+    # Optional: set a fixed rounding to avoid floating point mismatch
+    M <- round(M, 12)  # fixed rounding, not user-specified
+    do.call(paste, c(as.data.frame(M), sep = "\r"))
+  }
+  sup_key <- as_key(X_sup)
+  sub_key <- as_key(X_sub)
+  match(sub_key, sup_key)
+}
+
+
+

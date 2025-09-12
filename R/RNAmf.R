@@ -154,15 +154,15 @@ RNAmf <- function(X_list, y_list, kernel = "sqex", constant = TRUE, ...) {
 
   fits <- vector("list", L)
   fit_fun <- switch(kernel,
-                    sqex = function(X, y) GP(X, y, constant = constant),
-                    matern1.5 = function(X, y) matGP(X, y, nu = nu, constant = constant),
-                    matern2.5 = function(X, y) matGP(X, y, nu = nu, constant = constant) )
+                    sqex = function(X, y, ...) GP(X, y, constant = constant, ...),
+                    matern1.5 = function(X, y, ...) matGP(X, y, nu = nu, constant = constant, ...),
+                    matern2.5 = function(X, y, ...) matGP(X, y, nu = nu, constant = constant, ...) )
   pred_fun <- switch(kernel,
                      sqex = function(fit, Xnew) pred.GP(fit, Xnew)$mu,
                      matern1.5 = function(fit, Xnew) pred.matGP(fit, Xnew)$mu,
                      matern2.5 = function(fit, Xnew) pred.matGP(fit, Xnew)$mu )
   # Fit Level 1
-  fits[[1]] <- fit_fun(X_list[[1]], y_list[[1]])
+  fits[[1]] <- fit_fun(X_list[[1]], y_list[[1]], ...)
   # Fit level 2-L recursively
   for (lvl in 2:L) {
     X_curr <- X_list[[lvl]]
@@ -172,7 +172,7 @@ RNAmf <- function(X_list, y_list, kernel = "sqex", constant = TRUE, ...) {
       mu_pred <- pred_fun(fits[[j]], X_aug)
       X_aug <- cbind(X_curr, mu_pred)
     }
-    fits[[lvl]] <- fit_fun(X_aug, y_curr)
+    fits[[lvl]] <- fit_fun(X_aug, y_curr, ...)
   }
 
   structure(list(fits = fits, level = L, kernel = kernel, constant = constant, time = proc.time()[3] - t0), class = "RNAmf" )

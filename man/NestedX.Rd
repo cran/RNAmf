@@ -21,7 +21,6 @@ The function constructs nested design sets with multiple fidelity levels
 \details{
 The procedure replace the points of lower level design \eqn{\mathcal{X}_{l-1}}
 with the closest points from higher level design \eqn{\mathcal{X}_{l}}.
-The length of \eqn{\mathcal{X}_{l-1}} may be larger than the user specified size.
 For details, see "\href{https://github.com/cran/MuFiCokriging}{\code{NestedDesign}}".
 }
 \examples{

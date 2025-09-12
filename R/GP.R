@@ -48,7 +48,7 @@
 #'
 #' GP(X1, y1)
 #' }
-GP <- function(X, y, g = sqrt(.Machine$double.eps), constant = FALSE, p=0.01, min_cor = 0.01, max_cor = 0.5) { # p=0.05 for hetGP
+GP <- function(X, y, g = sqrt(.Machine$double.eps), constant = FALSE, p=0.1, min_cor = 0.01, max_cor = 0.5) { # p=0.05 for hetGP
   if (constant) {
     if (is.null(dim(X))) X <- matrix(X, ncol = 1)
 

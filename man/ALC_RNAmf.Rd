@@ -4,7 +4,7 @@
 \alias{ALC_RNAmf}
 \title{find the next point by ALC criterion}
 \usage{
-ALC_RNAmf(Xref = NULL, Xcand = NULL, fit, mc.sample = 100,
+ALC_RNAmf(Xref = NULL, Xcand = NULL, fit, MC = FALSE, mc.sample = 100,
 cost = NULL, optim = TRUE, parallel = FALSE, ncore = 1, trace=TRUE)
 }
 \arguments{
@@ -13,6 +13,8 @@ cost = NULL, optim = TRUE, parallel = FALSE, ncore = 1, trace=TRUE)
 \item{Xcand}{vector or matrix of candidate set which could be added into the current design only when \code{optim=FALSE}. \code{Xcand} is the set of the points where ALC criterion is evaluated. If \code{Xcand=NULL}, \code{Xref} is used. Default is \code{NULL}. See details.}
 
 \item{fit}{object of class \code{RNAmf}.}
+
+\item{MC}{logical indicating whether to use MC approximation to impute the posterior variance or use posterior means. Default \code{FALSE}.}
 
 \item{mc.sample}{a number of mc samples generated for the imputation through MC approximation. Default is \code{100}.}
 
