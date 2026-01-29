@@ -93,6 +93,8 @@ zetafun <- function(w1, w2, m, s, nu, theta) {
     term3 <- exp((10*s - sqrt(5)*theta*(wsmall+wlarge-2*m)) / t2) *
       ( (e5_1 + e5_2*lam51_2 + e5_3*lam51_3 + e5_4*lam51_4 + e5_5*lam51_5) * pnorm((wsmall-mud)/sig) +
           (e5_2 + e5_3*lam52_3 + e5_4*lam52_4 + e5_5*lam52_5) * (sig/sqrt(2*pi)) * exp(-(wsmall-mud)^2/(2*s)) )
+  }else {
+    stop("zetafun: 'nu' must be 1.5 or 2.5")
   }
   return(term1 + term2 + term3)
 }

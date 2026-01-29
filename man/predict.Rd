@@ -4,12 +4,14 @@
 \alias{predict.RNAmf}
 \title{prediction of the RNAmf emulator with multiple fidelity levels.}
 \usage{
-\method{predict}{RNAmf}(object, x, ...)
+\method{predict}{RNAmf}(object, x = NULL, nimpute = 50, ...)
 }
 \arguments{
 \item{object}{An object of class \code{RNAmf} fitted by \code{\link{RNAmf}}.}
 
 \item{x}{A vector or matrix of new input locations for prediction.}
+
+\item{nimpute}{Number of imputations for non-nested designs. Default is 50.}
 
 \item{...}{Additional arguments for compatibility with generic method \code{predict}.}
 }
@@ -25,6 +27,9 @@ The function computes the posterior mean and variance of RNA models with multipl
 by fitted model from \code{\link{RNAmf}}.
 }
 \details{
+The \code{predict.RNAmf} function internally calls \code{\link{closed_form_RNA}}
+to recursively compute the closed-form posterior mean and variance at each level.
+
 From the fitted model from \code{\link{RNAmf}},
 the posterior mean and variance are calculated based on the closed-form expression derived by a recursive fashion.
 The formulas depend on its kernel choices.
@@ -33,7 +38,6 @@ For further details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401
 \examples{
 \donttest{
 ### two levels example ###
-library(lhs)
 
 ### Perdikaris function ###
 f1 <- function(x) {
@@ -55,11 +59,6 @@ set.seed(1)
 X <- NestedX(c(n1, n2), 1)
 X1 <- X[[1]]
 X2 <- X[[2]]
-
-### n1 and n2 might be changed from NestedX ###
-### assign n1 and n2 again ###
-n1 <- nrow(X1)
-n2 <- nrow(X2)
 
 y1 <- f1(X1)
 y2 <- f2(X2)
@@ -124,12 +123,6 @@ X <- NestedX(c(n1, n2, n3), 2)
 X1 <- X[[1]]
 X2 <- X[[2]]
 X3 <- X[[3]]
-
-### n1, n2 and n3 might be changed from NestedX ###
-### assign n1, n2 and n3 again ###
-n1 <- nrow(X1)
-n2 <- nrow(X2)
-n3 <- nrow(X3)
 
 y1 <- apply(X1,1,output.branin, l=1)
 y2 <- apply(X2,1,output.branin, l=2)

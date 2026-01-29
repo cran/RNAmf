@@ -4,7 +4,8 @@
 \alias{RNAmf}
 \title{Fitting the Recursive Non-Additive model with multiple fidelity levels}
 \usage{
-RNAmf(X_list, y_list, kernel = "sqex", constant = TRUE, ...)
+RNAmf(X_list, y_list, kernel = "sqex", constant = TRUE,
+init = NULL, n.iter = 50, burn.ratio = 0.75, trace = TRUE, ...)
 }
 \arguments{
 \item{X_list}{A list of the matrices of input locations for all fidelity levels.}
@@ -14,6 +15,14 @@ RNAmf(X_list, y_list, kernel = "sqex", constant = TRUE, ...)
 \item{kernel}{A character specifying the kernel type to be used. Choices are \code{"sqex"}(squared exponential), \code{"matern1.5"}, or \code{"matern2.5"}. Default is \code{"sqex"}.}
 
 \item{constant}{A logical indicating for constant mean of GP (\code{constant=TRUE}) or zero mean (\code{constant=FALSE}). Default is \code{TRUE}.}
+
+\item{init}{Optional vector of initial parameter values for optimization. Default is \code{NULL}.}
+
+\item{n.iter}{Number of iterations for the stochastic EM algorithm for non-nested designs. Default is 50.}
+
+\item{burn.ratio}{Fraction of iterations to discard as burn-in. Default is 0.75.}
+
+\item{trace}{A logical indicating to print progress of iterations if \code{TRUE}, or not if \code{FALSE}. Default is \code{TRUE}.}
 
 \item{...}{Additional arguments for compatibility with \code{optim}.}
 }
@@ -25,6 +34,7 @@ A list of class \code{RNAmf} with:
   \item \code{level}: The number of fidelity levels \eqn{l}.
   \item \code{kernel}: A copy of \code{kernel}.
   \item \code{constant}: A copy of \code{constant}.
+  \item \code{nested}: A logical indicating whether the design is nested.
   \item \code{time}: A scalar indicating the computation time.
 }
 }
@@ -60,7 +70,6 @@ For further details, see Heo and Sung (2025, <\doi{https://doi.org/10.1080/00401
 \examples{
 \donttest{
 ### two levels example ###
-library(lhs)
 
 ### Perdikaris function ###
 f1 <- function(x) {
@@ -82,11 +91,6 @@ set.seed(1)
 X <- NestedX(c(n1, n2), 1)
 X1 <- X[[1]]
 X2 <- X[[2]]
-
-### n1 and n2 might be changed from NestedX ###
-### assign n1 and n2 again ###
-n1 <- nrow(X1)
-n2 <- nrow(X2)
 
 y1 <- f1(X1)
 y2 <- f2(X2)
@@ -131,12 +135,6 @@ X <- NestedX(c(n1, n2, n3), 2)
 X1 <- X[[1]]
 X2 <- X[[2]]
 X3 <- X[[3]]
-
-### n1, n2 and n3 might be changed from NestedX ###
-### assign n1, n2 and n3 again ###
-n1 <- nrow(X1)
-n2 <- nrow(X2)
-n3 <- nrow(X3)
 
 y1 <- apply(X1,1,output.branin, l=1)
 y2 <- apply(X2,1,output.branin, l=2)

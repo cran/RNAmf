@@ -1,7 +1,7 @@
 Package: RNAmf
 Type: Package
 Title: Recursive Non-Additive Emulator for Multi-Fidelity Data
-Version: 1.1.2
+Version: 1.1.3
 Authors@R: c(
 	person(given="Junoh", family="Heo", role=c("aut", "cre"), email="heojunoh@msu.edu"), 	     	person(given="Chih-Li", family="Sung", role="aut", email="sungchih@msu.edu")
 	)
@@ -9,12 +9,13 @@ Maintainer: Junoh Heo <heojunoh@msu.edu>
 Description: Performs RNA emulation and active learning proposed by Heo and Sung (2025) <doi:10.1080/00401706.2024.2376173> for multi-fidelity computer experiments. The RNA emulator is particularly useful when the simulations with different fidelity level are nonlinearly correlated. The hyperparameters in the model are estimated by maximum likelihood estimation. 
 License: GPL-3
 Encoding: UTF-8
-Imports: plgp, stats, methods, lhs, doParallel, foreach
+Imports: plgp, stats, methods, lhs, doParallel, foreach, doRNG, fields,
+        mvtnorm
 Suggests: knitr, rmarkdown
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2025-09-12 19:05:44 UTC; junoh
+Packaged: 2026-01-29 20:16:01 UTC; junoh
 Author: Junoh Heo [aut, cre],
   Chih-Li Sung [aut]
 Repository: CRAN
-Date/Publication: 2025-09-12 19:20:02 UTC
+Date/Publication: 2026-01-29 20:40:08 UTC

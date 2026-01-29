@@ -18,7 +18,7 @@ subsetX <- function(X1 = NULL, X2 = NULL) {
 
   a <- rowSums(X2^2)                # length n2
   b <- rowSums(X1^2)                # length n1
-  D <- outer(a, b, "+") - 2 * (X2 %*% t(X1))  # n2 x n1 squared distances
+  D <- outer(a, b, "+") - 2 * tcrossprod(X2, X1)  # n2 x n1 squared distances
 
   taken <- rep(FALSE, n1)
   indice <- integer(n2)

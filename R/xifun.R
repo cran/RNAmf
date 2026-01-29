@@ -59,6 +59,8 @@ xifun <- function(w, m, s, theta, nu) {
     term2 <- exp((5*s - 2*c5*theta*(w - m)) / (2*t2)) *
       ( (e2_1 + e2_2 * lam21_2 + e1_3 * lam21_3) * pnorm((w - mub)/sig) +
           (e2_2 + e1_3 * lam22_3) * sig / sqrt(2 * pi) * exp(-(w - mub)^2/(2*s)) )
+  }else {
+    stop("xifun: 'nu' must be 1.5 or 2.5")
   }
   return(term1 + term2)
 }
