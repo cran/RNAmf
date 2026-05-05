@@ -92,67 +92,122 @@ residuals.RNAmf <- function(object, ...) {
 }
 
 #' @method plot RNAmf
-#' @importFrom graphics par lines points legend
+#' @import ggplot2
+#' @importFrom ggpubr ggarrange
+#' @importFrom scales hue_pal
+#' @importFrom stats setNames predict
 #' @export
-plot.RNAmf <- function(x, ...) {
-  # 1. Determine dimensions and number of levels
+plot.RNAmf <- function(x, true_funcs = NULL, cols = NULL, ylim = NULL, ...) {
+  y <- lower <- upper <- mu <- NULL
   L <- x$level
-  d <- ncol(x$fits[[1]]$X)
-
-  # 2. Stop if input is not 1-dimensional
-  if (d > 1) {
-    stop("The plot method for 'RNAmf' currently only supports 1-dimensional inputs.")
+  if (ncol(x$fits[[1]]$X) > 1) {
+    stop("The plot method currently only supports 1-dimensional inputs.")
   }
-
-  # 3. Setup plotting layout (1 row, L columns)
-  oldpar <- par(mfrow = c(1, L))
-  on.exit(par(oldpar))
-
-  # 4. Generate 1D Functional Plot
-  # Create a grid of 101 points from 0 to 1
+  
+  # 2. Setup colors
+  if (is.null(cols)) {
+    cols <- c("red", "black", "blue", "darkgreen", "purple")
+  }
+  if (L > length(cols)) cols <- rep(cols, ceiling(L/length(cols)))
+  
+  pred_col <- hue_pal()(3)[3]
+  
+  # 3. Generate prediction grid
   xg <- matrix(seq(0, 1, length.out = 101), ncol = 1)
-
-  # Get predictions for ALL levels at once
   preds <- predict(x, xg)
-
-  for (l in 1:L) {
-    # Extract training data for this level
-    # Note: We take only the 1st column (original input) even if X is augmented
-    X_train <- x$fits[[l]]$X[, 1]
-    y_train <- x$fits[[l]]$y
-
-    # Extract predictions for this level
-    y_mu  <- preds$mu[[l]]
-    y_sig <- sqrt(preds$sig2[[l]])
-
-    # Calculate 95% Confidence Interval
-    lower <- y_mu - 1.96 * y_sig
-    upper <- y_mu + 1.96 * y_sig
-
-    # Determine plot limits to ensure everything fits
-    ylim <- range(c(y_train, lower, upper), na.rm = TRUE)
-
-    # Plot Mean Curve
-    plot(xg, y_mu, type = "l", lwd = 2, col = "blue", ylim = ylim,
-         main = paste("Level", l, "Fit"),
-         xlab = "x", ylab = "y", ...)
-
-    # Add Confidence Interval (Dashed lines)
-    lines(xg, lower, col = "blue", lty = 2)
-    lines(xg, upper, col = "blue", lty = 2)
-
-    # Add Training Points
-    points(X_train, y_train, pch = 16, cex = 1, col = "black")
-
-    # Add Legend (only on the first plot to save space)
-    if (l == 1) {
-      legend("topleft", legend = c("Mean", "95% CI", "Data"),
-             col = c("blue", "blue", "black"),
-             lty = c(1, 2, NA), pch = c(NA, NA, 16), bty = "n")
+  df_xg <- data.frame(x = as.numeric(xg))
+  
+  # 4. Handle ylim
+  if (is.null(ylim)) {
+    y_all <- numeric(0)
+    for (l in 1:L) {
+      y_all <- c(y_all, x$fits[[l]]$y, 
+                 preds$mu[[l]] - 1.96 * sqrt(preds$sig2[[l]]), 
+                 preds$mu[[l]] + 1.96 * sqrt(preds$sig2[[l]])) 
     }
+    if (!is.null(true_funcs)) {
+      for (l in 1:L) y_all <- c(y_all, true_funcs[[l]](xg)) 
+    }
+    global_ylim <- range(y_all, na.rm = TRUE)
+  } else {
+    global_ylim <- ylim
   }
-
-  invisible(x)
+  
+  user_theme <- theme_minimal() +
+    theme(
+      axis.title.x = element_text(size = 15, margin = margin(t = 10), hjust = 0.5),
+      axis.title.y = element_blank(),
+      panel.border = element_blank(), 
+      plot.title = element_text(hjust = 0.5, size = 16),
+      legend.title = element_blank(), 
+      legend.position = "bottom"
+    )
+  
+  level_names <- paste("Level", 1:L)
+  all_legend_names <- c(level_names, "RNA emulator")
+  
+  global_colors <- setNames(c(cols[1:L], pred_col), all_legend_names)
+  global_shapes <- setNames(c(1:L, NA), all_legend_names)
+  global_linetypes <- setNames(c(rep("dashed", L), "solid"), all_legend_names)
+  
+  global_scales <- list(
+    scale_color_manual(name = "", values = global_colors, drop = FALSE, limits = all_legend_names),
+    scale_shape_manual(name = "", values = global_shapes, drop = FALSE, limits = all_legend_names),
+    scale_linetype_manual(name = "", values = global_linetypes, drop = FALSE, limits = all_legend_names)
+  )
+  
+  # Inject invisible data so the master legend ALWAYS generates flawlessly
+  dummy_df <- data.frame(x = NA, y = NA)
+  dummy_layers <- list(
+    geom_line(data = dummy_df, aes(x = x, y = y, color = "RNA emulator", linetype = "RNA emulator"), linewidth = 0.75, na.rm = TRUE)
+  )
+  for (l in 1:L) {
+    lvl <- level_names[l]
+    dummy_layers <- append(dummy_layers, list(
+      geom_line(data = dummy_df, aes(x = x, y = y, color = !!lvl, linetype = !!lvl), linewidth = 0.75, na.rm = TRUE),
+      geom_point(data = dummy_df, aes(x = x, y = y, color = !!lvl, shape = !!lvl), size = 3, na.rm = TRUE)
+    ))
+  }
+  
+  plot_list <- list()
+  
+  # 5. Model Fits (True functions are now overlaid here if provided)
+  for (l in 1:L) {
+    df_fit <- data.frame(
+      x = df_xg$x,
+      mu = preds$mu[[l]],
+      lower = preds$mu[[l]] - 1.96 * sqrt(preds$sig2[[l]]),
+      upper = preds$mu[[l]] + 1.96 * sqrt(preds$sig2[[l]])
+    )
+    df_train <- data.frame(x = x$fits[[l]]$X[, 1], y = x$fits[[l]]$y)
+    lvl_name <- level_names[l]
+    
+    p_fit <- ggplot() +
+      geom_ribbon(data = df_fit, aes(x = x, ymin = lower, ymax = upper), fill = "grey", alpha = 0.6) +
+      geom_line(data = df_fit, aes(x = x, y = mu, color = "RNA emulator", linetype = "RNA emulator"), linewidth = 0.75) +
+      geom_point(data = df_train, aes(x = x, y = y, color = !!lvl_name, shape = !!lvl_name), size = 3)
+    
+    # Overlay the true function for this specific level if it exists
+    if (!is.null(true_funcs)) {
+      df_true <- data.frame(x = df_xg$x, y = true_funcs[[l]](xg))
+      p_fit <- p_fit +
+        geom_line(data = df_true, aes(x = x, y = y, color = !!lvl_name, linetype = !!lvl_name), linewidth = 0.75) 
+    }
+    
+    # Add labels, scales, and dummy layers
+    p_fit <- p_fit +
+      labs(title = paste("Level", l, "Fit"), x = "x", y = "y") +
+      coord_cartesian(ylim = global_ylim) +
+      user_theme + global_scales + dummy_layers 
+    
+    plot_list[[paste0("Fit_", l)]] <- p_fit
+  }
+  
+  # 6. Arrange plots
+  final_plot <- suppressWarnings(ggarrange(plotlist = plot_list, nrow = 1, ncol = length(plot_list), common.legend = TRUE, legend = "bottom"))
+  
+  print(final_plot)
+  invisible(final_plot) 
 }
 
 #' @title Fitting the Recursive Non-Additive model with multiple fidelity levels
@@ -190,7 +245,7 @@ plot.RNAmf <- function(x, ...) {
 #' @param y_list A list of the vectors or matrices of response values for all fidelity levels.
 #' @param kernel A character specifying the kernel type to be used. Choices are \code{"sqex"}(squared exponential), \code{"matern1.5"}, or \code{"matern2.5"}. Default is \code{"sqex"}.
 #' @param constant A logical indicating for constant mean of GP (\code{constant=TRUE}) or zero mean (\code{constant=FALSE}). Default is \code{TRUE}.
-#' @param init Optional vector of initial parameter values for optimization. Default is \code{NULL}.
+#' @param init A list of the vectors of initial parameter values for optimization. Default is \code{NULL}.
 #' @param n.iter Number of iterations for the stochastic EM algorithm for non-nested designs. Default is 50.
 #' @param burn.ratio Fraction of iterations to discard as burn-in. Default is 0.75.
 #' @param trace A logical indicating to print progress of iterations if \code{TRUE}, or not if \code{FALSE}. Default is \code{TRUE}.

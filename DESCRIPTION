@@ -1,7 +1,7 @@
 Package: RNAmf
 Type: Package
 Title: Recursive Non-Additive Emulator for Multi-Fidelity Data
-Version: 1.1.3
+Version: 1.1.4
 Authors@R: c(
 	person(given="Junoh", family="Heo", role=c("aut", "cre"), email="heojunoh@msu.edu"), 	     	person(given="Chih-Li", family="Sung", role="aut", email="sungchih@msu.edu")
 	)
@@ -10,12 +10,12 @@ Description: Performs RNA emulation and active learning proposed by Heo and Sung
 License: GPL-3
 Encoding: UTF-8
 Imports: plgp, stats, methods, lhs, doParallel, foreach, doRNG, fields,
-        mvtnorm
+        mvtnorm, ggplot2, ggpubr, scales
 Suggests: knitr, rmarkdown
 RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-01-29 20:16:01 UTC; junoh
+Packaged: 2026-05-05 02:51:06 UTC; junoh
 Author: Junoh Heo [aut, cre],
   Chih-Li Sung [aut]
 Repository: CRAN
-Date/Publication: 2026-01-29 20:40:08 UTC
+Date/Publication: 2026-05-05 05:20:02 UTC

@@ -16,7 +16,7 @@ init = NULL, n.iter = 50, burn.ratio = 0.75, trace = TRUE, ...)
 
 \item{constant}{A logical indicating for constant mean of GP (\code{constant=TRUE}) or zero mean (\code{constant=FALSE}). Default is \code{TRUE}.}
 
-\item{init}{Optional vector of initial parameter values for optimization. Default is \code{NULL}.}
+\item{init}{A list of the vectors of initial parameter values for optimization. Default is \code{NULL}.}
 
 \item{n.iter}{Number of iterations for the stochastic EM algorithm for non-nested designs. Default is 50.}
 

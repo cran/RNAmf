@@ -2142,7 +2142,6 @@ obj.ALC_level_3_3 <- function(Xcand, Xref, fit, MC=FALSE, mc.sample, parallel = 
 #' @importFrom foreach foreach
 #' @importFrom doRNG %dorng%
 #' @importFrom doParallel registerDoParallel stopImplicitCluster
-#' @importFrom parallel makeCluster stopCluster clusterExport clusterEvalQ
 #'
 #' @usage AL_RNAmf(criterion = c("ALM", "ALC", "ALD", "ALMC"), fit,
 #' Xref = NULL, Xcand = NULL, MC = FALSE, mc.sample = 100, cost = NULL,
@@ -2310,10 +2309,8 @@ AL_RNAmf <- function(criterion = c("ALM", "ALC", "ALD", "ALMC"), fit, Xref = NUL
   
   ### parallel setup ###
   if (parallel) {
-    cl <- makeCluster(ncore)
-    registerDoParallel(cl)
-    clusterEvalQ(cl, library(RNAmf))
-    on.exit(stopCluster(cl), add = TRUE)
+    registerDoParallel(cores = ncore)
+    on.exit(stopImplicitCluster(), add = TRUE)
   }
   
   ### Xcand setup ###
@@ -2354,7 +2351,7 @@ AL_RNAmf <- function(criterion = c("ALM", "ALC", "ALD", "ALMC"), fit, Xref = NUL
     
     # A. Grid Search on Xcand
     if (parallel) {
-      vals <- foreach(i = 1:nrow(Xcand), .combine = c) %dorng% {
+      vals <- foreach(i = 1:nrow(Xcand), .combine = c, .export = c("pred.GP", "covar.sep", "distance"), .packages = "RNAmf") %dorng% {
         -obj_fun(matrix(Xcand[i, ], nrow = 1), fit = fit)
       }
       attr(vals, "rng") <- NULL
@@ -2390,7 +2387,7 @@ AL_RNAmf <- function(criterion = c("ALM", "ALC", "ALD", "ALMC"), fit, Xref = NUL
     if(trace) cat("Calculating deduced variance:", (proc.time() - t0)[3], "seconds\n")
     
     best_level <- which.max(ALMC_scores)
-    final_Xnext <- Xnext
+    final_Xnext <- c(Xnext)
     AL_out <- ALMC_vals / cumsum(cost)
     names(AL_out) <- paste0("ALMC", 1:L)
     
@@ -2412,7 +2409,7 @@ AL_RNAmf <- function(criterion = c("ALM", "ALC", "ALD", "ALMC"), fit, Xref = NUL
       }
       
       if (parallel) {
-        vals <- foreach(i = 1:nrow(Xcand), .combine = c, .export = c("pred.GP", "covar.sep", "distance")) %dorng% {
+        vals <- foreach(i = 1:nrow(Xcand), .combine = c, .export = c("pred.GP", "covar.sep", "distance"), .packages = "RNAmf") %dorng% {
           val <- wrapper(matrix(Xcand[i, ], nrow = 1))
           if (criterion %in% c("ALM", "ALD")) return(-val) else return(val)
         }
@@ -2462,10 +2459,11 @@ AL_RNAmf <- function(criterion = c("ALM", "ALC", "ALD", "ALMC"), fit, Xref = NUL
     
     names(AL_out) <- paste0(criterion, 1:L)
     best_level <- which.max(level_scores)
-    final_Xnext <- matrix(best_pars[[best_level]], nrow=1)
+    final_Xnext <- c(matrix(best_pars[[best_level]], nrow=1))
     
     if(trace) cat("Calculation completed in:", (proc.time() - t0)[3], "seconds\n")
   }
   
   return(list(AL = AL_out, cost = cost, Xcand = Xcand, chosen = list(level = best_level, Xnext = final_Xnext), time = unname((proc.time() - t0)[3])))
 }
+
